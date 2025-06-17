@@ -1,0 +1,51 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+target
+
+
+/nginx-1.28.0.zip
+/upload/
+/nginx-1.28.0/
+/logs/
+
+/dot-chat-admin/src/main/resources/application-dev.yml
+/dot-chat-admin/src/main/resources/application-local.yml
+/dot-chat-admin/src/main/resources/application-prod.yml
+/dot-chat-server/src/main/resources/application-dev.yml
+/dot-chat-server/src/main/resources/application-local.yml
+/dot-chat-server/src/main/resources/application-prod.yml
+/common-util/pom.xml
+/dot-chat-admin/pom.xml
+/dot-chat-server/pom.xml
+/dot-chat-web/pom.xml
