@@ -1,0 +1,282 @@
+/**
+ * 群内小组聊天功能样式
+ * @author: 吴安然
+ * @date: 2024-12-XX
+ */
+
+/* 小组按钮样式 */
+.subgroup-btn {
+    margin-left: 10px;
+    position: relative;
+}
+
+.subgroup-btn .badge {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    font-size: 10px;
+}
+
+/* 小组模式指示器 */
+.subgroup-indicator {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-width: 300px;
+}
+
+.subgroup-indicator strong {
+    color: #0066cc;
+}
+
+/* 小组模式下的聊天容器 */
+.chat-container.subgroup-mode {
+    background-color: #f8f9fa;
+    border: 2px solid #0066cc;
+    border-radius: 8px;
+}
+
+.chat-container.subgroup-mode::before {
+    content: "小组聊天模式";
+    position: absolute;
+    top: -15px;
+    left: 10px;
+    background: #0066cc;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 100;
+}
+
+/* 小组管理模态框样式 */
+#subgroupModal .modal-content {
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+#subgroupModal .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+#subgroupModal .modal-header .close {
+    color: white;
+    opacity: 0.8;
+}
+
+#subgroupModal .modal-header .close:hover {
+    opacity: 1;
+}
+
+/* Tab样式 */
+#subgroupModal .nav-tabs {
+    border-bottom: 2px solid #e9ecef;
+}
+
+#subgroupModal .nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 12px 20px;
+}
+
+#subgroupModal .nav-tabs .nav-link.active {
+    color: #667eea;
+    border-bottom: 2px solid #667eea;
+    background: none;
+}
+
+#subgroupModal .nav-tabs .nav-link:hover {
+    color: #667eea;
+    border-color: transparent;
+}
+
+/* 成员选择器样式 */
+#memberSelector {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+#memberSelector .custom-control-label {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+#memberSelector .custom-control-label:hover {
+    background-color: #e9ecef;
+}
+
+#memberSelector .custom-control-input:checked ~ .custom-control-label {
+    background-color: #667eea;
+    color: white;
+}
+
+#memberSelector img {
+    margin-right: 8px;
+}
+
+/* 邀请列表样式 */
+#invitesList .list-group-item {
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#invitesList .list-group-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* 当前小组信息卡片样式 */
+#currentSubgroupInfo .card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+#currentSubgroupInfo .card:hover {
+    transform: translateY(-2px);
+}
+
+#currentSubgroupInfo .card-title {
+    color: #667eea;
+    font-weight: 600;
+}
+
+#currentSubgroupInfo .btn-group .btn {
+    margin-right: 5px;
+    border-radius: 6px;
+}
+
+/* 加载动画样式 */
+.spinner-border {
+    color: #667eea;
+}
+
+/* 警告和信息提示样式 */
+.alert-info {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+    color: #1976d2;
+    border-radius: 8px;
+}
+
+.alert-warning {
+    background-color: #fff3e0;
+    border-color: #ff9800;
+    color: #f57c00;
+    border-radius: 8px;
+}
+
+.alert-danger {
+    background-color: #ffebee;
+    border-color: #f44336;
+    color: #d32f2f;
+    border-radius: 8px;
+}
+
+/* 按钮样式增强 */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+    border: none;
+    border-radius: 6px;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ff9800 0%, #ffa726 100%);
+    border: none;
+    border-radius: 6px;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%);
+    border: none;
+    border-radius: 6px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    #subgroupModal .modal-dialog {
+        margin: 10px;
+    }
+    
+    .subgroup-indicator {
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+        right: 10px !important;
+        max-width: none !important;
+    }
+    
+    #memberSelector {
+        max-height: 150px;
+    }
+    
+    #memberSelector .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* 动画效果 */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.subgroup-indicator {
+    animation: slideIn 0.3s ease-out;
+}
+
+#subgroupModal .modal-content {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* 自定义滚动条 */
+#memberSelector::-webkit-scrollbar,
+#invitesList::-webkit-scrollbar {
+    width: 6px;
+}
+
+#memberSelector::-webkit-scrollbar-track,
+#invitesList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#memberSelector::-webkit-scrollbar-thumb,
+#invitesList::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 3px;
+}
+
+#memberSelector::-webkit-scrollbar-thumb:hover,
+#invitesList::-webkit-scrollbar-thumb:hover {
+    background: #5a6fd8;
+} 
