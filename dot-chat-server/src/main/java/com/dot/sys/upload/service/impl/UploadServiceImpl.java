@@ -16,6 +16,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +44,9 @@ public class UploadServiceImpl implements UploadService {
 
     @Resource(name = "redisUtil")
     protected RedisUtil redisUtil;
+
+    @Value("${server.port}")
+    private String serverPort;
 
     private final String uploadType = "attachment";
 
@@ -79,35 +83,12 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public UploadResponse uploadVideoAsync(MultipartFile multipart, String model) {
         UploadResponse response = getUploadResponse(multipart, videoConfig, model);
-        // 上传视频封面
-        uploadVideoCoverImg(multipart, model, response);
+        // 动态拼接端口，生成完整封面图片URL
+        String defaultCoverUrl = "http://localhost:" + serverPort + "/ico/video-default.jpg";
+        response.setCoverUrl(defaultCoverUrl);
         // 上传视频文件
         upload(multipart, true, response);
         return response;
-    }
-
-    /**
-     * 上传视频封面
-     *
-     * @param multipart      文件
-     * @param model          model
-     * @param uploadResponse res
-     */
-    private void uploadVideoCoverImg(MultipartFile multipart, String model, UploadResponse uploadResponse) {
-        InputStream imageInputStream = VideoUtil.coverImageInputStream(1, multipart);
-        String newFileName = uploadResponse.getNewFileName().substring(0, uploadResponse.getNewFileName().lastIndexOf(".")) + ".jpg";
-        String uploadPath = UploadUtil.getUploadPath(videoConfig.getRootContext(), videoConfig.getType(), model) + newFileName;
-        if (ossConfig.isLocal()) {
-            uploadResponse.setStatus(1);
-            String targetPath = videoConfig.getRootPath() + "/" + UploadUtil.getUploadPath(videoConfig.getType(), model) + newFileName;
-            log.info("文件流保存到本地,targetPath:{}", targetPath);
-            FileUtil.saveToFile(imageInputStream, targetPath);
-        } else {
-            // 上传图片到oss
-            OSSUtil.getInstance(redisUtil, ossConfig).upload(imageInputStream, uploadPath, newFileName, uploadType);
-        }
-        String coverUrl = ossConfig.getDomain() + "/" + uploadPath;
-        uploadResponse.setCoverUrl(coverUrl);
     }
 
     private UploadResponse uploadFile(MultipartFile multipart, UploadFileConfig uploadConfig, String model,
