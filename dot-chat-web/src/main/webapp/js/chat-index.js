@@ -150,6 +150,7 @@ function topSearchItemDom(user, type) {
         clickStr = "toSendMsg('" + user.chatId + "')";
         user = user.toUser;
     }
+
     return `
             <li class="search-item" onclick="${clickStr}">
                 <div class="item-avatar">
@@ -159,7 +160,7 @@ function topSearchItemDom(user, type) {
                     <div class="nickname">${user.nickname}</div>
                 </div>
             </li>
-            `;
+        `;
 }
 
 function toSendMsg(chatId) {
@@ -888,6 +889,7 @@ function generateChatRoomDom(chatRoomList) {
         } else {//添加到未读消息集合
             unreadChatIdSet.add(chatRoom.chatId);
         }
+
         let chatRoomDom = `
                 <div class="${className}" chat-id="${chatRoom.chatId}" group-id="${chatRoom.groupId}" to-user-id="${toUser.userId}" is-dissolve="${toUser.isDissolve}" to-user-name="${toUser.nickname}" to-user-avatar="${toUser.avatar}" onclick="getChatMsgList(this)">
                     <div class="chat-avatar">
@@ -1918,31 +1920,14 @@ function generateGroupMemberDom(groupMemberList) {
             className = "more hide";
             $(".group-member-more").removeClass("hide");
         }
+
         let groupMDom = `
-                 <li class="${className} avatar" user-id="${groupMember.userId}" action="msg-more-info">
+                 <li class="${className}" user-id="${groupMember.userId}" nickname="${groupMember.nickname}">
                     <div class="member-head">
                         <img class="member-avatar" src="${groupMember.avatar}" alt=""/>
                     </div>
                     <div class="member-nickname">${groupMember.nickname}</div>
                 </li>
-            `;
-        groupMemberDom.append(groupMDom);
-    }
-    let groupMDom = `
-            <li onclick="openAddSubGroupMemberDialog('add')">
-                <div class="member-head">
-                    <div class="member-operation">+</div>
-                </div>
-            </li>
-        `;
-    groupMemberDom.append(groupMDom);
-    if (chatToUser.chatInfo.groupInfo.isGroupManager || chatToUser.chatInfo.groupInfo.isGroupLeader) {
-        groupMDom = `
-                <li onclick="openAddSubGroupMemberDialog('remove')">
-                <div class="member-head">
-                    <div class="member-operation">-</div>
-                </div>
-            </li>
             `;
         groupMemberDom.append(groupMDom);
     }
@@ -2775,7 +2760,7 @@ function groupManagerClick(_this) {
 function removeGroupManager(_this) {
     let nickname = $(_this).attr("nickname");
     let userId = $(_this).attr("user-id");
-    myConfirm('确定移除群管理员吗?', "确定要移除“" + nickname + "”管理员吗?", function () {
+    myConfirm('确定移除群管理员吗?', "确定要移除" + nickname + "管理员吗?", function () {
         let url = `${MSG_URL_PREFIX}/chat/group/removeGroupManager`;
         ajaxRequest(url, "post", {
             groupId: chatToUser.groupId,
@@ -2821,7 +2806,7 @@ function addGroupManager(_this) {
     }
     let nickname = $(_this).attr("nickname");
     let userId = $(_this).attr("user-id");
-    myConfirm('确定添加群管理员吗?', "确定要添加“" + nickname + "”为管理员吗?", function () {
+    myConfirm('确定添加群管理员吗?', "确定要添加" + nickname + "为管理员吗?", function () {
         let url = `${MSG_URL_PREFIX}/chat/group/addGroupManager`;
         ajaxRequest(url, "post", {
             groupId: chatToUser.groupId,
@@ -2911,11 +2896,11 @@ function openChatMsgHistoryDialog() {
     }
     let title = "聊天记录";
     if (parseInt(chatToUser.groupId) > 0) {
-        title = "“" + chatToUser.nickname + "”的聊天记录"
+        title = "" + chatToUser.nickname + "的聊天记录"
         $("#msg-group-member-select").parent().removeClass("hide");
         initGroupMemberSelectOption();
     } else {
-        title = "与“" + chatToUser.nickname + "”的聊天记录"
+        title = "与" + chatToUser.nickname + "的聊天记录"
         $("#msg-group-member-select").parent().addClass("hide");
     }
     searchMsgTypeClick($(".active"));
@@ -3638,10 +3623,14 @@ function getFriendList() {
         }
         let friendListDom = $("#friend-list");
         friendListDom.html("");
+        // 修正：确保容器可见
+        friendListDom.removeClass('hide').addClass('show');
         let friendList = res.data;
         let initialSet = new Set();
         for (let i = 0; i < friendList.length; i++) {
             let friend = friendList[i];
+            // 调试用：输出每个好友对象，确认isOnline字段
+            // console.log(friend);
             if (!initialSet.has(friend.initial)) {
                 let initialDom = `<label class="friend-initial">${friend.initial}</label>`;
                 initialSet.add(friend.initial);
@@ -3651,6 +3640,7 @@ function getFriendList() {
                 <div class="friend-info" friend-id="${friend.friendId}" onclick="getFriendInfo(this);">
                     <div class="friend-head">
                         <img class="friend-avatar" src="${friend.avatar}" alt=""/>
+                        <span class="online-dot ${(friend.isOnline === true || friend.isOnline === 'true') ? 'online' : 'offline'}"></span>
                     </div>
                     <div class="friend-right">
                         <div class="friend-title">

@@ -193,6 +193,7 @@ public class ChatUserServiceImpl extends ServiceImpl<ChatUserDao, ChatUser> impl
             response.setIsFriend(true);
             BeanUtil.copyProperties(chatUser, response);
             response.setUserId(userId);
+            response.setIsOnline(chatUser.getIsOnline());
             return response;
         }
         ChatUserFriendDto chatUserFriendDto = chatFriendDao.selectChatUserFriendInfo(chatUser.getId(), userId);
@@ -201,6 +202,7 @@ public class ChatUserServiceImpl extends ServiceImpl<ChatUserDao, ChatUser> impl
             response.setIsFriend(true);
             response.setUserId(userId);
             response.setSourceDesc(ChatSourceEm.getDesc(chatUserFriendDto.getSource()));
+            response.setIsOnline(chatUserFriendDto.getIsOnline());
         } else {
             log.warn("用户非好友,chatUserId:{},userId:{}", chatUser.getId(), userId);
             ChatUser user = getById(userId);
@@ -211,6 +213,7 @@ public class ChatUserServiceImpl extends ServiceImpl<ChatUserDao, ChatUser> impl
             BeanUtil.copyProperties(user, response);
             response.setIsFriend(false);
             response.setUserId(userId);
+            response.setIsOnline(user.getIsOnline());
         }
         return response;
     }

@@ -1243,7 +1243,10 @@ html, body {
     font-weight: 400;
     font-size: 13px;
     white-space: nowrap;
+    overflow: hidden;
     text-overflow: ellipsis;
+    display: block;
+    /* 可选：max-width: 100%; */
 }
 
 .friend-apply .friend-apply-list .friend-right .friend-title .apply-status {
@@ -3368,4 +3371,99 @@ html, body {
     line-height: 20px;
     font-weight: 400;
     text-decoration: none;
+}
+
+/* 在线状态样式 */
+.avatar-offline {
+    filter: grayscale(100%);
+    opacity: 0.6;
+}
+
+.avatar-online {
+    filter: none;
+    opacity: 1;
+}
+
+.online-status {
+    font-size: 12px;
+    color: #999;
+    margin-left: 5px;
+}
+
+.online-status.online {
+    color: #52c41a;
+}
+
+.online-status.offline {
+    color: #999;
+}
+
+/* 聊天室列表中的在线状态 */
+.chat-name .online-status {
+    font-size: 11px;
+    margin-left: 3px;
+}
+
+/* 好友列表中的在线状态 */
+.friend-name .online-status {
+    font-size: 11px;
+    margin-left: 3px;
+}
+
+/* 群成员列表中的在线状态 */
+.member-nickname .online-status {
+    font-size: 11px;
+    margin-left: 3px;
+}
+
+.online-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+.online-dot.online { background: #4caf50; }
+.online-dot.offline { background: #bdbdbd; }
+
+.friend-info {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+}
+.friend-info.select {
+    display: flex;
+    align-items: center;
+    background-color: #d2d2d2 !important;
+}
+.friend-head {
+    width: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.friend-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: block;
+}
+.friend-right {
+    margin-left: 10px;
+    flex: 1;
+    min-width: 0; /* 允许flex子项溢出时省略号而不是换行 */
+}
+.friend-title {
+    min-width: 0; /* 防止嵌套flex导致溢出换行 */
+}
+.friend-name {
+    font-weight: 400;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    /* 可选：max-width: 100%; */
 }

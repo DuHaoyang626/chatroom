@@ -35,16 +35,22 @@ public class ChatUserFriendResponse implements Serializable {
 	private String nickname;
 
 	/**
-	 * 头像
+	 * 用户头像
 	 */
-	@Schema(description = "头像")
+	@Schema(description = "用户头像")
 	private String avatar;
 
 	/**
-	 * 性别(0:保密,1:男,2:女)
+	 * 用户性别
 	 */
-	@Schema(description = "性别(0:保密,1:男,2:女)")
+	@Schema(description = "用户性别")
 	private Integer sex;
+
+	/**
+	 * 个性签名
+	 */
+	@Schema(description = "个性签名")
+	private String signature;
 
 	/**
 	 * 好友备注
@@ -59,9 +65,14 @@ public class ChatUserFriendResponse implements Serializable {
 	private Boolean isTop;
 
 	/**
-	 * 昵称或备注首字母
+	 * 首字母
 	 */
-	@Schema(description = "昵称或备注首字母")
+	@Schema(description = "首字母")
 	private String initial;
 
+	/**
+	 * 是否在线
+	 */
+	@Schema(description = "是否在线")
+	private Boolean isOnline;
 }
