@@ -13,8 +13,8 @@ import java.io.Serializable;
 /**
  * Socket 发送消息模板
  *
- * @author: Dao-yang.
- * @date: Created in 2024/1/18 10:40
+ * @author: fusihan.
+ * @date: Created in 2025/6/18 10:40
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -32,7 +32,6 @@ public class TioMessage implements Serializable {
      * 撤回消息的ID
      */
     private Integer revokeId;
-
 
     /**
      * 聊天室ID

@@ -48,7 +48,7 @@ public class JRWsTioServerListener extends WsTioServerListener {
 
     @Override
     public void onAfterConnected(ChannelContext channelContext, boolean isConnected,
-                                 boolean isReconnect) throws Exception {
+            boolean isReconnect) throws Exception {
         super.onAfterConnected(channelContext, isConnected, isReconnect);
         if (log.isDebugEnabled()) {
             log.debug("onAfterConnected--{}--isConnected:{}--isReconnect:{}", channelContext, isConnected, isReconnect);
@@ -65,7 +65,7 @@ public class JRWsTioServerListener extends WsTioServerListener {
 
     @Override
     public void onBeforeClose(ChannelContext channelContext, Throwable throwable, String remark,
-                              boolean isRemove) throws Exception {
+            boolean isRemove) throws Exception {
         super.onBeforeClose(channelContext, throwable, remark, isRemove);
         if (log.isDebugEnabled()) {
             log.debug("onBeforeClose--{}", channelContext);
@@ -80,7 +80,8 @@ public class JRWsTioServerListener extends WsTioServerListener {
             userOffline(channelContext);
             String msgId = redisUtil.get(CommConstant.CHAT_MSG_CALLING_KEY + channelContext.userid);
             if (StringUtils.isNotBlank(msgId)) {
-                log.warn("用户异常下线,通话中断,离线用户ID:{},msgId:{},isOnline:{}", channelContext.userid, msgId, TioUtil.isOnline(channelContext.tioConfig, channelContext.userid));
+                log.warn("用户异常下线,通话中断,离线用户ID:{},msgId:{},isOnline:{}", channelContext.userid, msgId,
+                        TioUtil.isOnline(channelContext.tioConfig, channelContext.userid));
                 // 发送通话中断信息
                 sendDroppedMsg(channelContext, msgId);
             }
@@ -93,7 +94,7 @@ public class JRWsTioServerListener extends WsTioServerListener {
         MessageCall oldMsgCall = JSON.parseObject(chatMsg.getMsg(), MessageCall.class);
         if (oldMsgCall.getCallType() == CallTypeEm.invite
                 || oldMsgCall.getCallType() == CallTypeEm.hangup
-                || oldMsgCall.getCallType() == CallTypeEm.refuse
+                || oldMsgCall.getCallType() == CallTypeEm.reject
                 || oldMsgCall.getCallType() == CallTypeEm.cancel
                 || oldMsgCall.getCallType() == CallTypeEm.no_answer
                 || oldMsgCall.getCallType() == CallTypeEm.dropped) { // 异常中断时,通话未接通或已经结束不发送通话中断信息
