@@ -503,12 +503,7 @@ function toFriendApplyInfo(friendApplyList, chatId) {
 
 function uploadAndSendVideoFile(file) {
     uploadVideoAsync(file, 'chat-msg', function (res) {
-        if (res.code !== 200) {
-            myAlert("上传视频失败", res.message, 'err');
-            return;
-        }
         logger.info("上传成功,res:", res);
-        // 这里是关键修改：应该传递 res.data 而不是整个 res
-        sendObjMsg(res.data, MsgType.VIDEO);
+        sendObjMsg(res, MsgType.VIDEO);
     });
 }
