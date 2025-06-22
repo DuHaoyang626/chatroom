@@ -1,0 +1,57 @@
+@startuml 用户漫游登录顺序图
+
+actor "新设备用户" as NewUser
+participant "新设备客户端" as NewClient
+participant "登录服务器" as AuthServer
+participant "会话管理器" as SessionManager
+participant "消息同步器" as SyncManager
+collections "其他在线设备" as OtherDevices
+database "消息数据库" as MessageDB
+
+== 漫游登录流程 ==
+NewUser -> NewClient: 输入账号密码
+activate NewClient
+
+NewClient -> AuthServer: 发送登录请求
+activate AuthServer
+AuthServer -> AuthServer: 验证用户信息
+
+alt 验证通过
+    AuthServer -> SessionManager: 检查设备会话
+    activate SessionManager
+    
+    alt 存在其他在线设备
+        SessionManager -> OtherDevices: 发送强制下线通知
+        activate OtherDevices
+        OtherDevices --> SessionManager: 确认下线
+        deactivate OtherDevices
+    end
+    
+    SessionManager -> SessionManager: 创建新会话
+    SessionManager --> AuthServer: 返回会话信息
+    deactivate SessionManager
+    
+    AuthServer --> NewClient: 登录成功
+    
+    NewClient -> SyncManager: 请求消息同步
+    activate SyncManager
+    SyncManager -> MessageDB: 获取历史消息
+    activate MessageDB
+    MessageDB --> SyncManager: 返回消息数据
+    deactivate MessageDB
+    
+    SyncManager -> NewClient: 同步消息和会话
+    deactivate SyncManager
+    
+    NewClient -> NewClient: 更新本地数据
+    NewClient --> NewUser: 显示主界面
+    
+else 验证失败
+    AuthServer --> NewClient: 返回错误信息
+    NewClient --> NewUser: 显示错误提示
+end
+
+deactivate AuthServer
+deactivate NewClient
+
+@enduml

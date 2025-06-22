@@ -1,0 +1,44 @@
+@startuml 群聊消息处理活动图
+
+start
+:用户发送群消息;
+
+if (消息类型?) then (文本消息)
+  :创建文本消息对象;
+else (文件消息)
+  :上传文件;
+  if (上传成功?) then (是)
+    :创建文件消息对象;
+  else (否)
+    :显示上传失败提示;
+    stop
+  endif
+endif
+
+:发送到服务器;
+
+fork
+  :验证发送者权限;
+fork again
+  :检查群成员列表;
+fork again
+  :准备消息广播;
+end fork
+
+if (验证通过?) then (是)
+  :获取在线群成员;
+  :广播消息给在线成员;
+  fork
+    :保存消息到数据库;
+  fork again
+    :更新群聊界面;
+  end fork
+  :显示发送成功;
+else (否)
+  :返回错误信息;
+  :显示发送失败提示;
+endif
+
+stop
+
+@enduml

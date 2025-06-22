@@ -1,0 +1,46 @@
+@startuml 发送图片顺序图
+
+actor 用户 as User
+participant "客户端GUI" as GUI
+participant "文件处理器" as FileHandler
+participant "聊天服务器" as Server
+participant "文件服务器" as FileServer
+participant "消息存储器" as MessageDB
+collections "接收方客户端" as Receivers
+
+== 发送图片流程 ==
+User -> GUI: 选择图片
+activate GUI
+
+GUI -> FileHandler: 处理图片文件
+activate FileHandler
+FileHandler -> FileHandler: 压缩图片
+FileHandler -> FileHandler: 生成缩略图
+FileHandler --> GUI: 返回处理结果
+
+GUI -> FileServer: 上传图片
+activate FileServer
+FileServer -> FileServer: 存储图片
+FileServer --> GUI: 返回图片URL
+
+GUI -> Server: 发送图片消息
+activate Server
+Server -> MessageDB: 保存消息记录
+activate MessageDB
+MessageDB --> Server: 保存成功
+deactivate MessageDB
+
+alt 接收方在线
+    Server -> Receivers: 推送图片消息
+    activate Receivers
+    Receivers -> FileServer: 请求下载图片
+    FileServer --> Receivers: 返回图片数据
+    Receivers -> Receivers: 显示图片
+    deactivate Receivers
+end
+
+Server --> GUI: 发送成功
+GUI --> User: 显示发送成功
+deactivate GUI
+
+@enduml
