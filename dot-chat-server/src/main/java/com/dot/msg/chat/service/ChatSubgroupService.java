@@ -3,6 +3,7 @@ package com.dot.msg.chat.service;
 import com.dot.msg.chat.model.ChatSubgroup;
 import com.dot.msg.chat.model.ChatSubgroupInvite;
 import com.dot.msg.chat.model.ChatSubgroupMember;
+import com.dot.msg.chat.model.ChatSubgroupMsg;
 
 import java.util.List;
 
@@ -123,4 +124,41 @@ public interface ChatSubgroupService {
      * @return 成员ID列表
      */
     List<Integer> getSubgroupMemberIds(Integer subgroupId);
+
+    /**
+     * 获取小组消息列表
+     *
+     * @param subgroupId 小组ID
+     * @param limit 消息数量限制
+     * @return 消息列表
+     */
+    List<ChatSubgroupMsg> getSubgroupMessages(Integer subgroupId, Integer limit);
+
+    /**
+     * 获取小组消息历史（分页）
+     *
+     * @param subgroupId 小组ID
+     * @param beforeTime 时间点
+     * @param limit 消息数量限制
+     * @return 消息列表
+     */
+    List<ChatSubgroupMsg> getSubgroupMessageHistory(Integer subgroupId, String beforeTime, Integer limit);
+
+    /**
+     * 搜索小组消息
+     *
+     * @param subgroupId 小组ID
+     * @param keyword 搜索关键词
+     * @param limit 消息数量限制
+     * @return 消息列表
+     */
+    List<ChatSubgroupMsg> searchSubgroupMessages(Integer subgroupId, String keyword, Integer limit);
+
+    /**
+     * 获取小组消息统计信息
+     *
+     * @param subgroupId 小组ID
+     * @return 消息总数
+     */
+    Integer getSubgroupMessageCount(Integer subgroupId);
 } 

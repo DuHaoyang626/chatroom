@@ -92,6 +92,12 @@
                     <span class="right-arrow"></span>
                 </div>
             </div>
+            <div id="subgroup-chat-label" class="group-info" onclick="subgroupChatDialogOpen()">
+                <label class="info-title">小组聊天</label>
+                <div class="base-info-right">
+                    <span class="right-arrow"></span>
+                </div>
+            </div>
             <div class="group-info" onclick="groupNameDialogOpen('groupNickname')">
                 <label class="info-title">我在群里的昵称</label>
                 <div class="base-info-right">
@@ -173,6 +179,37 @@
             </div>
         </div>
 
+        <!-- 小组聊天管理对话框 -->
+        <div id="subgroup-chat-dialog" style="display: none">
+            <div class="chat-msg-info-set">
+                <div class="group-info" onclick="createSubgroupDialog()">
+                    <label class="info-title">创建小组</label>
+                    <div class="base-info-right">
+                        <span class="right-arrow"></span>
+                    </div>
+                </div>
+                <div class="group-info" onclick="joinSubgroupDialog()">
+                    <label class="info-title">加入小组</label>
+                    <div class="base-info-right">
+                        <span class="right-arrow"></span>
+                    </div>
+                </div>
+                <div class="group-info" onclick="mySubgroupDialog()">
+                    <label class="info-title">我的小组</label>
+                    <div class="base-info-right">
+                        <span class="right-arrow"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-msg-info-set" onclick="subgroupInvitesDialog()">
+                <label class="info-title">小组邀请</label>
+                <div class="base-info-right">
+                    <span id="subgroup-invite-count" class="group-invite-count hide">0</span>
+                    <span class="right-arrow"></span>
+                </div>
+            </div>
+        </div>
+
         <!-- 群管理对话框 -->
         <div id="group-managers-dialog" style="display: none">
             <div class="chat-msg-info-set">
@@ -238,6 +275,110 @@
                 </div>
             </div>
         </div>
+        <!-- 创建小组对话框 -->
+        <div id="create-subgroup-dialog" style="display: none">
+            <div class="subgroup-dialog-header">
+                <span class="subgroup-dialog-title">创建小组</span>
+                <button class="subgroup-dialog-close" onclick="closeCreateSubgroupDialog()">×</button>
+            </div>
+            <div class="create-subgroup">
+                <div class="subgroup-name-input">
+                    <label class="subgroup-label">小组名称</label>
+                    <input id="subgroup-name-input" class="subgroup-input" type="text" placeholder="请输入小组名称(2-20个字符)" maxlength="20"/>
+                </div>
+                <div class="user-search">
+                    <div class="search-content">
+                        <input id="search-subgroup-member-input" class="search-input" type="text" placeholder="输入昵称搜索群成员"/>
+                    </div>
+                    <button class="primarybtn" onclick="searchSubgroupMemberClick()">查找</button>
+                </div>
+                <div class="search-user-list">
+                    <ul id="subgroup-member-list" class="subgroup-member-list-ul">
+                        <!-- 可邀请的群成员列表 -->
+                    </ul>
+                </div>
+                <div class="create-subgroup-bottom">
+                    <button class="create-subgroup-btn" disabled onclick="createSubgroupClick()">创建小组</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 我的小组对话框 -->
+        <div id="my-subgroup-dialog" style="display: none">
+            <div class="subgroup-dialog-header">
+                <span class="subgroup-dialog-title">我的小组</span>
+                <button class="subgroup-dialog-close" onclick="closeMySubgroupDialog()">×</button>
+            </div>
+            <div class="my-subgroup">
+                <div id="current-subgroup-info" class="current-subgroup-info hide">
+                    <div class="subgroup-header">
+                        <span class="subgroup-name"></span>
+                        <button class="subgroup-action-btn" onclick="enterSubgroupChat()">进入聊天</button>
+                        <button class="subgroup-action-btn subgroup-leave-btn" onclick="leaveSubgroupClick()">退出小组</button>
+                    </div>
+                    <div class="subgroup-members">
+                        <label class="subgroup-members-title">小组成员：</label>
+                        <ul class="subgroup-members-list">
+                            <!-- 小组成员头像列表 -->
+                        </ul>
+                    </div>
+                </div>
+                <div id="no-subgroup-info" class="no-subgroup-info">
+                    <div class="no-subgroup-text">您当前没有参与任何小组</div>
+                    <button class="primarybtn" onclick="createSubgroupDialog()">创建小组</button>
+                    <button class="primarybtn margin-left-10" onclick="joinSubgroupDialog()">加入小组</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 小组邀请对话框 -->
+        <div id="subgroup-invites-dialog" style="display: none">
+            <div class="subgroup-dialog-header">
+                <span class="subgroup-dialog-title">小组邀请</span>
+                <button class="subgroup-dialog-close" onclick="closeSubgroupInvitesDialog()">×</button>
+            </div>
+            <div class="subgroup-invites">
+                <ul id="subgroup-invites-list" class="subgroup-invites-list">
+                    <!-- 小组邀请列表 -->
+                </ul>
+                <div id="no-invites-info" class="no-invites-info hide">
+                    <div class="no-invites-text">暂无小组邀请</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 小组聊天窗口 -->
+        <div id="subgroup-chat-window" class="subgroup-chat-window hide">
+            <div class="subgroup-chat-header">
+                <div class="subgroup-chat-title">
+                    <span id="subgroup-chat-name">小组聊天</span>
+                    <span id="subgroup-member-count">(0人)</span>
+                </div>
+                <div class="subgroup-chat-controls">
+                    <button class="subgroup-control-btn" onclick="minimizeSubgroupChat()">—</button>
+                    <button class="subgroup-control-btn" onclick="closeSubgroupChat()">×</button>
+                </div>
+            </div>
+            <div class="subgroup-chat-content">
+                <ul id="subgroup-chat-messages" class="subgroup-chat-messages">
+                    <!-- 小组聊天消息列表 -->
+                </ul>
+            </div>
+            <div class="subgroup-chat-input">
+                <div class="subgroup-input-tools">
+                    <button class="subgroup-tool-btn" onclick="subgroupEmojiClick()">😊</button>
+                    <button class="subgroup-tool-btn" onclick="subgroupImageClick()">📷</button>
+                    <button class="subgroup-tool-btn" onclick="subgroupFileClick()">📁</button>
+                </div>
+                <div class="subgroup-input-area">
+                    <textarea id="subgroup-input-text" class="subgroup-input-textarea" 
+                              placeholder="输入消息内容..." 
+                              onkeydown="subgroupInputKeydown(event)"></textarea>
+                    <button id="subgroup-send-btn" class="subgroup-send-btn" onclick="sendSubgroupMessage()">发送</button>
+                </div>
+            </div>
+        </div>
+
         <!--   群公告对话框  -->
         <div id="group-notice-textbox-dialog" style="display: none">
             <div class="group-notice-textbox">

@@ -4,6 +4,7 @@ import com.dot.comm.entity.ResultBean;
 import com.dot.msg.chat.model.ChatSubgroup;
 import com.dot.msg.chat.model.ChatSubgroupInvite;
 import com.dot.msg.chat.model.ChatSubgroupMember;
+import com.dot.msg.chat.model.ChatSubgroupMsg;
 import com.dot.msg.chat.response.ChatUserResponse;
 import com.dot.msg.chat.service.ChatSubgroupService;
 import com.dot.msg.chat.service.ChatUserService;
@@ -166,5 +167,58 @@ public class ChatSubgroupController {
         ChatUserResponse currentUser = chatUserService.getCurrentChatUser();
         Boolean canJoin = chatSubgroupService.canJoinSubgroup(currentUser.getId(), parentGroupId);
         return ResultBean.success(canJoin);
+    }
+
+    /**
+     * 获取小组消息列表
+     */
+    @GetMapping("/messages")
+    @Operation(summary = "获取小组消息列表")
+    public ResultBean<List<ChatSubgroupMsg>> getSubgroupMessages(
+            @RequestParam("subgroupId") @NotNull(message = "小组ID不能为空") Integer subgroupId,
+            @RequestParam(value = "limit", defaultValue = "20") Integer limit) {
+        
+        List<ChatSubgroupMsg> messages = chatSubgroupService.getSubgroupMessages(subgroupId, limit);
+        return ResultBean.success(messages);
+    }
+
+    /**
+     * 获取小组消息历史（分页）
+     */
+    @GetMapping("/messages/history")
+    @Operation(summary = "获取小组消息历史")
+    public ResultBean<List<ChatSubgroupMsg>> getSubgroupMessageHistory(
+            @RequestParam("subgroupId") @NotNull(message = "小组ID不能为空") Integer subgroupId,
+            @RequestParam("beforeTime") @NotBlank(message = "时间点不能为空") String beforeTime,
+            @RequestParam(value = "limit", defaultValue = "20") Integer limit) {
+        
+        List<ChatSubgroupMsg> messages = chatSubgroupService.getSubgroupMessageHistory(subgroupId, beforeTime, limit);
+        return ResultBean.success(messages);
+    }
+
+    /**
+     * 搜索小组消息
+     */
+    @GetMapping("/messages/search")
+    @Operation(summary = "搜索小组消息")
+    public ResultBean<List<ChatSubgroupMsg>> searchSubgroupMessages(
+            @RequestParam("subgroupId") @NotNull(message = "小组ID不能为空") Integer subgroupId,
+            @RequestParam("keyword") @NotBlank(message = "搜索关键词不能为空") String keyword,
+            @RequestParam(value = "limit", defaultValue = "50") Integer limit) {
+        
+        List<ChatSubgroupMsg> messages = chatSubgroupService.searchSubgroupMessages(subgroupId, keyword, limit);
+        return ResultBean.success(messages);
+    }
+
+    /**
+     * 获取小组消息统计
+     */
+    @GetMapping("/messages/count")
+    @Operation(summary = "获取小组消息统计")
+    public ResultBean<Integer> getSubgroupMessageCount(
+            @RequestParam("subgroupId") @NotNull(message = "小组ID不能为空") Integer subgroupId) {
+        
+        Integer count = chatSubgroupService.getSubgroupMessageCount(subgroupId);
+        return ResultBean.success(count);
     }
 } 

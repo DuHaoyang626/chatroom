@@ -3369,3 +3369,486 @@ html, body {
     font-weight: 400;
     text-decoration: none;
 }
+
+/* ==================== 小组聊天相关样式 ==================== */
+
+/* 小组聊天对话框基础样式 */
+#subgroup-chat-dialog {
+    background-color: #f4f4f4;
+}
+
+.group-invite-count {
+    background-color: #ff4757;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 12px;
+    margin-right: 5px;
+    min-width: 16px;
+    text-align: center;
+}
+
+/* 小组对话框通用样式 */
+#create-subgroup-dialog,
+#my-subgroup-dialog,
+#subgroup-invites-dialog {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+/* 小组对话框通用头部样式 */
+.subgroup-dialog-header {
+    background-color: #2196F3;
+    color: white;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px 8px 0 0;
+    margin: 0;
+}
+
+.subgroup-dialog-title {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.subgroup-dialog-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+}
+
+.subgroup-dialog-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 创建小组对话框样式 */
+.create-subgroup {
+    background-color: #f4f4f4;
+    padding: 15px;
+    margin: 0;
+}
+
+.subgroup-name-input {
+    margin-bottom: 15px;
+}
+
+.subgroup-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.subgroup-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.subgroup-member-list-ul {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    background-color: white;
+    border-radius: 4px;
+}
+
+.subgroup-member-list-ul li {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.subgroup-member-list-ul li:hover {
+    background-color: #f0f0f0;
+}
+
+.subgroup-member-list-ul li.selected {
+    background-color: #e3f2fd;
+}
+
+.subgroup-member-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.subgroup-member-name {
+    flex: 1;
+}
+
+.create-subgroup-bottom {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.create-subgroup-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.create-subgroup-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* 我的小组对话框样式 */
+.my-subgroup {
+    background-color: #f4f4f4;
+    padding: 15px;
+    margin: 0;
+}
+
+.current-subgroup-info {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.subgroup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.subgroup-name {
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+}
+
+.subgroup-action-btn {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+.subgroup-leave-btn {
+    background-color: #f44336;
+}
+
+.subgroup-members-title {
+    font-weight: bold;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.subgroup-members-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.subgroup-members-list li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.subgroup-members-list .member-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-bottom: 4px;
+}
+
+.subgroup-members-list .member-name {
+    font-size: 12px;
+    color: #666;
+    max-width: 50px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.no-subgroup-info {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.no-subgroup-text {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* 小组邀请对话框样式 */
+.subgroup-invites {
+    background-color: #f4f4f4;
+    padding: 15px;
+    margin: 0;
+}
+
+.subgroup-invites-title {
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.subgroup-invites-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.subgroup-invite-item {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+}
+
+.invite-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.invite-subgroup-name {
+    font-weight: bold;
+    color: #333;
+    margin-right: 10px;
+}
+
+.invite-time {
+    color: #999;
+    font-size: 12px;
+}
+
+.invite-from {
+    color: #666;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.invite-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.invite-accept-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.invite-reject-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.no-invites-info {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+/* 小组聊天窗口样式 */
+.subgroup-chat-window {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 400px;
+    height: 500px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.subgroup-chat-window.minimized {
+    height: 40px;
+    overflow: hidden;
+}
+
+.subgroup-chat-header {
+    background-color: #2196F3;
+    color: white;
+    padding: 8px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px 8px 0 0;
+    cursor: move;
+}
+
+.subgroup-chat-title {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.subgroup-chat-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.subgroup-control-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.subgroup-control-btn:hover {
+    background-color: rgba(255,255,255,0.2);
+    border-radius: 2px;
+}
+
+.subgroup-chat-content {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+}
+
+.subgroup-chat-messages {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.subgroup-chat-messages li {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    max-width: 80%;
+}
+
+.subgroup-chat-messages li.self {
+    background-color: #2196F3;
+    color: white;
+    margin-left: auto;
+    text-align: right;
+}
+
+.subgroup-chat-messages li.other {
+    background-color: white;
+    border: 1px solid #ddd;
+}
+
+.subgroup-msg-sender {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.subgroup-msg-time {
+    font-size: 11px;
+    color: #999;
+    margin-top: 4px;
+}
+
+.subgroup-chat-input {
+    border-top: 1px solid #ddd;
+    padding: 10px;
+    background-color: white;
+    border-radius: 0 0 8px 8px;
+}
+
+.subgroup-input-tools {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 8px;
+}
+
+.subgroup-tool-btn {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.subgroup-tool-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.subgroup-input-area {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.subgroup-input-textarea {
+    flex: 1;
+    min-height: 60px;
+    max-height: 120px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: none;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.subgroup-send-btn {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.subgroup-send-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.margin-left-10 {
+    margin-left: 10px;
+}

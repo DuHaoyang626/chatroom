@@ -2,6 +2,7 @@ package com.dot.msg.chat.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -12,12 +13,15 @@ import com.dot.comm.exception.ApiException;
 import com.dot.msg.chat.dao.ChatSubgroupDao;
 import com.dot.msg.chat.dao.ChatSubgroupInviteDao;
 import com.dot.msg.chat.dao.ChatSubgroupMemberDao;
+import com.dot.msg.chat.dao.ChatSubgroupMsgDao;
 import com.dot.msg.chat.model.ChatSubgroup;
 import com.dot.msg.chat.model.ChatSubgroupInvite;
 import com.dot.msg.chat.model.ChatSubgroupMember;
 import com.dot.msg.chat.model.ChatSubgroupMsg;
 import com.dot.msg.chat.service.ChatGroupMemberService;
 import com.dot.msg.chat.service.ChatSubgroupService;
+import com.dot.msg.chat.service.ChatMsgService;
+import com.dot.msg.chat.request.ChatMsgAddRequest;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,7 +50,13 @@ public class ChatSubgroupServiceImpl extends ServiceImpl<ChatSubgroupDao, ChatSu
     private ChatSubgroupInviteDao chatSubgroupInviteDao;
 
     @Resource
+    private ChatSubgroupMsgDao chatSubgroupMsgDao;
+
+    @Resource
     private ChatGroupMemberService chatGroupMemberService;
+    
+    @Resource
+    private ChatMsgService chatMsgService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -287,6 +297,7 @@ public class ChatSubgroupServiceImpl extends ServiceImpl<ChatSubgroupDao, ChatSu
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class) 
     public Boolean sendSubgroupMessage(Integer subgroupId, Integer sendUserId, String msgType, String content) {
         log.info("发送小组消息: subgroupId={}, sendUserId={}, msgType={}", subgroupId, sendUserId, msgType);
         
@@ -301,19 +312,54 @@ public class ChatSubgroupServiceImpl extends ServiceImpl<ChatSubgroupDao, ChatSu
             throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "小组不存在或已解散");
         }
 
-        // 创建消息记录
-        ChatSubgroupMsg message = new ChatSubgroupMsg();
-        message.setSubgroupId(subgroupId);
-        message.setParentGroupId(subgroup.getParentGroupId());
-        message.setSendUserId(sendUserId);
-        message.setMsgType(msgType);
-        message.setMsg(content);
-        message.setSendTime(DateUtil.now());
-        message.setTimestamp(System.currentTimeMillis());
-
-        // TODO: 通过WebSocket发送消息到小组成员 - 稍后实现
-        log.info("小组消息创建成功: {}", message);
-        return true;
+        try {
+            // 方式1：使用普通群聊的存储机制保存小组消息
+            ChatMsgAddRequest msgAddRequest = new ChatMsgAddRequest();
+            msgAddRequest.setChatId("SUBGROUP_" + subgroupId); // 小组聊天室ID，使用前缀区分
+            msgAddRequest.setChatType("SUBGROUP"); // 小组聊天类型
+            msgAddRequest.setGroupId(subgroupId); // 使用小组ID作为群组ID
+            msgAddRequest.setMsgType(msgType);
+            msgAddRequest.setMsg(content);
+            msgAddRequest.setSendUserId(sendUserId);
+            msgAddRequest.setToUserId(subgroupId); // 接收者为小组ID
+            msgAddRequest.setDeviceType("PC");
+            
+            // 调用统一的消息保存服务（这会自动处理消息关系表、聊天室更新等）
+            Integer mainMsgId = chatMsgService.saveMsg(msgAddRequest);
+            
+            if (mainMsgId == null || mainMsgId <= 0) {
+                throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "保存小组消息到主表失败");
+            }
+            
+            // 方式2：同时保存到小组消息表（用于小组特定的查询和统计）
+            ChatSubgroupMsg subgroupMsg = new ChatSubgroupMsg();
+            subgroupMsg.setSubgroupId(subgroupId);
+            subgroupMsg.setParentGroupId(subgroup.getParentGroupId());
+            subgroupMsg.setSendUserId(sendUserId);
+            subgroupMsg.setMsgType(msgType);
+            subgroupMsg.setMsg(content);
+            subgroupMsg.setSendTime(DateUtil.now());
+            subgroupMsg.setTimestamp(System.currentTimeMillis());
+            
+            boolean subgroupSaved = chatSubgroupMsgDao.insert(subgroupMsg) > 0;
+            if (!subgroupSaved) {
+                log.warn("小组消息记录表保存失败，但主消息已保存: mainMsgId={}", mainMsgId);
+            }
+            
+            log.info("小组消息保存成功: mainMsgId={}, subgroupMsgId={}, subgroupId={}", 
+                mainMsgId, subgroupMsg.getId(), subgroupId);
+            
+            // TODO: 通过WebSocket发送消息到小组成员 - 这里会由chatMsgService自动处理
+            List<Integer> memberIds = getSubgroupMemberIds(subgroupId);
+            log.info("小组消息需要推送给成员: memberIds={}, mainMsgId={}", memberIds, mainMsgId);
+            
+            return true;
+            
+        } catch (Exception e) {
+            log.error("发送小组消息失败: subgroupId={}, sendUserId={}, error={}", 
+                subgroupId, sendUserId, e.getMessage(), e);
+            throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "发送小组消息失败: " + e.getMessage());
+        }
     }
 
     @Override
@@ -350,6 +396,52 @@ public class ChatSubgroupServiceImpl extends ServiceImpl<ChatSubgroupDao, ChatSu
     @Override
     public List<Integer> getSubgroupMemberIds(Integer subgroupId) {
         return chatSubgroupMemberDao.getSubgroupMemberIds(subgroupId);
+    }
+
+    @Override
+    public List<ChatSubgroupMsg> getSubgroupMessages(Integer subgroupId, Integer limit) {
+        log.info("获取小组消息列表: subgroupId={}, limit={}", subgroupId, limit);
+        
+        // 默认查询最新的20条消息
+        if (limit == null || limit <= 0) {
+            limit = 20;
+        }
+        
+        return chatSubgroupMsgDao.getSubgroupMessages(subgroupId, limit);
+    }
+
+    @Override
+    public List<ChatSubgroupMsg> getSubgroupMessageHistory(Integer subgroupId, String beforeTime, Integer limit) {
+        log.info("获取小组消息历史: subgroupId={}, beforeTime={}, limit={}", subgroupId, beforeTime, limit);
+        
+        // 默认查询20条消息
+        if (limit == null || limit <= 0) {
+            limit = 20;
+        }
+        
+        return chatSubgroupMsgDao.getSubgroupMessageHistory(subgroupId, beforeTime, limit);
+    }
+
+    @Override
+    public List<ChatSubgroupMsg> searchSubgroupMessages(Integer subgroupId, String keyword, Integer limit) {
+        log.info("搜索小组消息: subgroupId={}, keyword={}, limit={}", subgroupId, keyword, limit);
+        
+        if (StrUtil.isBlank(keyword)) {
+            return new ArrayList<>();
+        }
+        
+        // 默认搜索50条消息
+        if (limit == null || limit <= 0) {
+            limit = 50;
+        }
+        
+        return chatSubgroupMsgDao.searchSubgroupMessages(subgroupId, keyword, limit);
+    }
+
+    @Override
+    public Integer getSubgroupMessageCount(Integer subgroupId) {
+        log.info("获取小组消息统计: subgroupId={}", subgroupId);
+        return chatSubgroupMsgDao.getSubgroupMessageCount(subgroupId);
     }
 
     /**

@@ -5,6 +5,7 @@ import com.dot.msg.chat.model.ChatSubgroup;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -32,6 +33,6 @@ public interface ChatSubgroupDao extends BaseMapper<ChatSubgroup> {
     /**
      * 更新小组成员数量
      */
-    @Select("UPDATE chat_subgroup SET member_count = (SELECT COUNT(*) FROM chat_subgroup_member WHERE subgroup_id = #{subgroupId} AND status = 1) WHERE id = #{subgroupId}")
+    @Update("UPDATE chat_subgroup SET member_count = (SELECT COUNT(*) FROM chat_subgroup_member WHERE subgroup_id = #{subgroupId} AND status = 1) WHERE id = #{subgroupId}")
     void updateMemberCount(@Param("subgroupId") Integer subgroupId);
 } 

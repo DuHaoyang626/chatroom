@@ -1789,6 +1789,23 @@ function registerNavTopMsgMoreClick() {
                     if ($dialogConfirm.find(claName).length > 0 || $dialogConfirm.parent().find(claName).length > 0) {
                         return;
                     }
+                    // 小组聊天相关对话框检查
+                    let $subgroupChatDia = $("#subgroup-chat-dialog");
+                    if ($subgroupChatDia.find(claName).length > 0 || $subgroupChatDia.parent().find(claName).length > 0) {
+                        return;
+                    }
+                    let $createSubgroupDia = $("#create-subgroup-dialog");
+                    if ($createSubgroupDia.find(claName).length > 0 || $createSubgroupDia.parent().find(claName).length > 0) {
+                        return;
+                    }
+                    let $mySubgroupDia = $("#my-subgroup-dialog");
+                    if ($mySubgroupDia.find(claName).length > 0 || $mySubgroupDia.parent().find(claName).length > 0) {
+                        return;
+                    }
+                    let $subgroupInvitesDia = $("#subgroup-invites-dialog");
+                    if ($subgroupInvitesDia.find(claName).length > 0 || $subgroupInvitesDia.parent().find(claName).length > 0) {
+                        return;
+                    }
                 }
             }
             chatMsgInfoDom.addClass("hide");
@@ -1813,6 +1830,7 @@ function loadMsgInfoPage() {
     if (parseInt(chatToUser.groupId) > 0) {
         $("#group-base-info").removeClass("hide");
         $(".logout-group").removeClass("hide");
+        $("#subgroup-chat-label").removeClass("hide");
         initGroupQrcodeDialog();
         initGroupNameDialog();
         initAddRemoveGroupManagerDialog();
@@ -1825,6 +1843,7 @@ function loadMsgInfoPage() {
         $(".group-member-more").addClass("hide");
         $("#group-base-info").addClass("hide");
         $(".logout-group").addClass("hide");
+        $("#subgroup-chat-label").addClass("hide");
     }
     if (!avatarTooltipDom) {
         avatarTooltipDom = chatUserAvatarTooltip();
@@ -2775,7 +2794,7 @@ function groupManagerClick(_this) {
 function removeGroupManager(_this) {
     let nickname = $(_this).attr("nickname");
     let userId = $(_this).attr("user-id");
-    myConfirm('确定移除群管理员吗?', "确定要移除“" + nickname + "”管理员吗?", function () {
+    myConfirm('确定移除群管理员吗?', "确定要移除" + nickname + "管理员吗?", function () {
         let url = `${MSG_URL_PREFIX}/chat/group/removeGroupManager`;
         ajaxRequest(url, "post", {
             groupId: chatToUser.groupId,
@@ -2821,7 +2840,7 @@ function addGroupManager(_this) {
     }
     let nickname = $(_this).attr("nickname");
     let userId = $(_this).attr("user-id");
-    myConfirm('确定添加群管理员吗?', "确定要添加“" + nickname + "”为管理员吗?", function () {
+    myConfirm('确定添加群管理员吗?', "确定要添加" + nickname + "为管理员吗?", function () {
         let url = `${MSG_URL_PREFIX}/chat/group/addGroupManager`;
         ajaxRequest(url, "post", {
             groupId: chatToUser.groupId,
@@ -2911,11 +2930,11 @@ function openChatMsgHistoryDialog() {
     }
     let title = "聊天记录";
     if (parseInt(chatToUser.groupId) > 0) {
-        title = "“" + chatToUser.nickname + "”的聊天记录"
+        title = "" + chatToUser.nickname + "的聊天记录"
         $("#msg-group-member-select").parent().removeClass("hide");
         initGroupMemberSelectOption();
     } else {
-        title = "与“" + chatToUser.nickname + "”的聊天记录"
+        title = "与" + chatToUser.nickname + "的聊天记录"
         $("#msg-group-member-select").parent().addClass("hide");
     }
     searchMsgTypeClick($(".active"));
@@ -3752,3 +3771,662 @@ function modifyFriendRemark(_this) {
 function remarkClick(_this) {
     $(_this).addClass("i-click");
 }
+
+// ==================== 小组聊天相关函数 ====================
+
+/**
+ * 打开小组聊天管理对话框
+ */
+function subgroupChatDialogOpen() {
+    // 隐藏其他对话框
+    $("#group-managers-dialog").hide();
+    $("#group-notice-textbox-dialog").hide();
+    
+    // 显示小组聊天对话框
+    $("#subgroup-chat-dialog").show();
+    
+    // 更新小组邀请数量（已添加错误处理）
+    updateSubgroupInviteCount();
+    
+    logger.info("打开小组聊天管理对话框");
+}
+
+/**
+ * 创建小组对话框
+ */
+function createSubgroupDialog() {
+    $("#subgroup-chat-dialog").hide();
+    $("#create-subgroup-dialog").show();
+    
+    // 清空表单
+    $("#subgroup-name-input").val("");
+    $("#search-subgroup-member-input").val("");
+    $("#subgroup-member-list").html("");
+    $(".create-subgroup-btn").prop("disabled", true);
+    
+    // 加载群成员列表用于邀请
+    loadGroupMembersForSubgroup();
+    
+    logger.info("打开创建小组对话框");
+}
+
+/**
+ * 加载群成员列表用于创建小组
+ */
+function loadGroupMembersForSubgroup() {
+    let groupMemberList = getLocalGroupMemberList();
+    if (!groupMemberList) {
+        logger.warn("无法获取群成员列表");
+        return;
+    }
+    
+    let currentUserId = chatUser.id;
+    let memberListHtml = "";
+    
+    for (let member of groupMemberList) {
+        if (member.userId === currentUserId) continue; // 排除自己
+        
+        memberListHtml += `
+            <li data-user-id="${member.userId}" onclick="selectSubgroupMember(this)">
+                <img class="subgroup-member-avatar" src="${member.avatar}" alt="">
+                <span class="subgroup-member-name">${member.nickname}</span>
+                <span class="member-select-status">+</span>
+            </li>
+        `;
+    }
+    
+    $("#subgroup-member-list").html(memberListHtml);
+}
+
+/**
+ * 搜索小组成员
+ */
+function searchSubgroupMemberClick() {
+    let keyword = $("#search-subgroup-member-input").val().trim();
+    if (!keyword) {
+        loadGroupMembersForSubgroup();
+        return;
+    }
+    
+    let groupMemberList = getLocalGroupMemberList();
+    if (!groupMemberList) return;
+    
+    let currentUserId = chatUser.id;
+    let filteredMembers = groupMemberList.filter(member => 
+        member.userId !== currentUserId && 
+        member.nickname.toLowerCase().includes(keyword.toLowerCase())
+    );
+    
+    let memberListHtml = "";
+    for (let member of filteredMembers) {
+        memberListHtml += `
+            <li data-user-id="${member.userId}" onclick="selectSubgroupMember(this)">
+                <img class="subgroup-member-avatar" src="${member.avatar}" alt="">
+                <span class="subgroup-member-name">${member.nickname}</span>
+                <span class="member-select-status">+</span>
+            </li>
+        `;
+    }
+    
+    $("#subgroup-member-list").html(memberListHtml);
+}
+
+/**
+ * 选择/取消选择小组成员
+ */
+function selectSubgroupMember(element) {
+    let $li = $(element);
+    $li.toggleClass("selected");
+    
+    let $status = $li.find(".member-select-status");
+    if ($li.hasClass("selected")) {
+        $status.text("✓");
+    } else {
+        $status.text("+");
+    }
+    
+    // 检查是否可以创建小组
+    checkCreateSubgroupEnabled();
+}
+
+/**
+ * 检查是否可以创建小组
+ */
+function checkCreateSubgroupEnabled() {
+    let subgroupName = $("#subgroup-name-input").val().trim();
+    let selectedMembers = $("#subgroup-member-list li.selected").length;
+    
+    let canCreate = subgroupName.length >= 2 && selectedMembers > 0;
+    $(".create-subgroup-btn").prop("disabled", !canCreate);
+}
+
+/**
+ * 创建小组
+ */
+function createSubgroupClick() {
+    let subgroupName = $("#subgroup-name-input").val().trim();
+    if (subgroupName.length < 2) {
+        myAlert("", "小组名称至少需要2个字符", "err");
+        return;
+    }
+    
+    let selectedMemberIds = [];
+    $("#subgroup-member-list li.selected").each(function() {
+        selectedMemberIds.push(parseInt($(this).data("user-id")));
+    });
+    
+    if (selectedMemberIds.length === 0) {
+        myAlert("", "请至少选择一个成员", "err");
+        return;
+    }
+    
+    // 调用后端API创建小组
+            let url = `${MSG_URL_PREFIX}/chat/subgroup/create`;
+    let data = {
+        parentGroupId: chatToUser.groupId,
+        name: subgroupName,
+        memberIds: selectedMemberIds
+    };
+    
+    ajaxSyncRequest(url, "post", data, null, function(res) {
+        if (res.code === 200) {
+            myAlert("", "小组创建成功", "suc");
+            $("#create-subgroup-dialog").hide();
+            $("#subgroup-chat-dialog").show();
+            // 刷新我的小组信息
+            loadMySubgroupInfo();
+        } else {
+            myAlert("", res.message || "创建小组失败", "err");
+        }
+    }, function(error) {
+        // API请求失败的处理
+        myAlert("", "网络错误，创建小组失败。请检查后端服务是否启动。", "err");
+        logger.error("创建小组API请求失败:", error);
+    });
+}
+
+/**
+ * 加入小组对话框
+ */
+function joinSubgroupDialog() {
+    $("#subgroup-chat-dialog").hide();
+    $("#subgroup-invites-dialog").show();
+    loadSubgroupInvites();
+}
+
+/**
+ * 我的小组对话框
+ */
+function mySubgroupDialog() {
+    $("#subgroup-chat-dialog").hide();
+    $("#my-subgroup-dialog").show();
+    loadMySubgroupInfo();
+}
+
+/**
+ * 加载我的小组信息
+ */
+function loadMySubgroupInfo() {
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/current`;
+    let data = { parentGroupId: chatToUser.groupId };
+    
+    ajaxSyncRequest(url, "get", data, null, function(res) {
+        if (res.code === 200 && res.data) {
+            // 有小组信息
+            showCurrentSubgroupInfo(res.data);
+        } else {
+            // 没有小组信息
+            showNoSubgroupInfo();
+        }
+    }, function(error) {
+        // API请求失败时显示无小组信息
+        showNoSubgroupInfo();
+        logger.warn("加载小组信息失败，可能是后端服务未启动:", error);
+    });
+}
+
+/**
+ * 显示当前小组信息
+ */
+function showCurrentSubgroupInfo(subgroupInfo) {
+    $("#current-subgroup-info").removeClass("hide");
+    $("#no-subgroup-info").hide();
+    
+    $(".subgroup-name").text(subgroupInfo.name);
+    
+    // 加载小组成员
+    loadSubgroupMembers(subgroupInfo.id);
+}
+
+/**
+ * 显示无小组信息
+ */
+function showNoSubgroupInfo() {
+    $("#current-subgroup-info").addClass("hide");
+    $("#no-subgroup-info").show();
+}
+
+/**
+ * 加载小组成员
+ */
+function loadSubgroupMembers(subgroupId) {
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/members`;
+    let data = { subgroupId: subgroupId };
+    
+    ajaxSyncRequest(url, "get", data, null, function(res) {
+        if (res.code === 200) {
+            let membersHtml = "";
+            for (let member of res.data) {
+                membersHtml += `
+                    <li>
+                        <img class="member-avatar" src="${member.avatar}" alt="">
+                        <span class="member-name">${member.nickname}</span>
+                    </li>
+                `;
+            }
+            $(".subgroup-members-list").html(membersHtml);
+        }
+    });
+}
+
+/**
+ * 进入小组聊天
+ */
+function enterSubgroupChat() {
+    $("#my-subgroup-dialog").hide();
+    $("#chat-msg-info").addClass("hide");
+    
+    // 显示小组聊天窗口
+    showSubgroupChatWindow();
+}
+
+/**
+ * 显示小组聊天窗口
+ */
+function showSubgroupChatWindow() {
+    $("#subgroup-chat-window").removeClass("hide");
+    
+    // 加载小组聊天消息
+    loadSubgroupMessages();
+}
+
+/**
+ * 最小化小组聊天窗口
+ */
+function minimizeSubgroupChat() {
+    $("#subgroup-chat-window").toggleClass("minimized");
+}
+
+/**
+ * 关闭小组聊天窗口
+ */
+function closeSubgroupChat() {
+    $("#subgroup-chat-window").addClass("hide");
+}
+
+/**
+ * 退出小组
+ */
+function leaveSubgroupClick() {
+    if (!confirm("确定要退出当前小组吗？")) {
+        return;
+    }
+    
+    // 获取当前小组ID
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/current`;
+    let data = { parentGroupId: chatToUser.groupId };
+    
+    ajaxSyncRequest(url, "get", data, null, function(res) {
+        if (res.code === 200 && res.data) {
+            let subgroupId = res.data.id;
+            
+            // 调用退出API
+            let leaveUrl = `${MSG_URL_PREFIX}/chat/subgroup/leave`;
+            let leaveData = { subgroupId: subgroupId };
+            
+            ajaxSyncRequest(leaveUrl, "post", leaveData, null, function(leaveRes) {
+                if (leaveRes.code === 200) {
+                    myAlert("", "已退出小组", "suc");
+                    showNoSubgroupInfo();
+                    closeSubgroupChat();
+                } else {
+                    myAlert("", leaveRes.message || "退出小组失败", "err");
+                }
+            });
+        }
+    });
+}
+
+/**
+ * 小组邀请对话框
+ */
+function subgroupInvitesDialog() {
+    $("#subgroup-chat-dialog").hide();
+    $("#subgroup-invites-dialog").show();
+    loadSubgroupInvites();
+}
+
+/**
+ * 加载小组邀请列表
+ */
+function loadSubgroupInvites() {
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/invites`;
+    
+    ajaxSyncRequest(url, "get", {}, null, function(res) {
+        if (res.code === 200) {
+            if (res.data && res.data.length > 0) {
+                showSubgroupInvites(res.data);
+            } else {
+                showNoInvites();
+            }
+        } else {
+            showNoInvites();
+            logger.warn("获取小组邀请列表失败:", res.message || "后端服务不可用");
+        }
+    }, function(error) {
+        // API请求失败时显示无邀请信息
+        showNoInvites();
+        logger.warn("小组邀请列表API请求失败，可能是后端服务未启动:", error);
+    });
+}
+
+/**
+ * 显示小组邀请列表
+ */
+function showSubgroupInvites(invites) {
+    $("#no-invites-info").addClass("hide");
+    
+    let invitesHtml = "";
+    for (let invite of invites) {
+        invitesHtml += `
+            <li class="subgroup-invite-item">
+                <div class="invite-header">
+                    <span class="invite-subgroup-name">${invite.subgroupName}</span>
+                    <span class="invite-time">${invite.createTime}</span>
+                </div>
+                <div class="invite-from">邀请人：${invite.inviterName}</div>
+                <div class="invite-actions">
+                    <button class="invite-accept-btn" onclick="acceptSubgroupInvite(${invite.id})">接受</button>
+                    <button class="invite-reject-btn" onclick="rejectSubgroupInvite(${invite.id})">拒绝</button>
+                </div>
+            </li>
+        `;
+    }
+    
+    $("#subgroup-invites-list").html(invitesHtml);
+}
+
+/**
+ * 显示无邀请信息
+ */
+function showNoInvites() {
+    $("#subgroup-invites-list").html("");
+    $("#no-invites-info").removeClass("hide");
+}
+
+/**
+ * 接受小组邀请
+ */
+function acceptSubgroupInvite(inviteId) {
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/accept`;
+    let data = { inviteId: inviteId };
+    
+    ajaxSyncRequest(url, "post", data, null, function(res) {
+        if (res.code === 200) {
+            myAlert("", "已加入小组", "suc");
+            loadSubgroupInvites(); // 刷新邀请列表
+            updateSubgroupInviteCount(); // 更新邀请数量
+        } else {
+            myAlert("", res.message || "加入小组失败", "err");
+        }
+    });
+}
+
+/**
+ * 拒绝小组邀请
+ */
+function rejectSubgroupInvite(inviteId) {
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/reject`;
+    let data = { inviteId: inviteId };
+    
+    ajaxSyncRequest(url, "post", data, null, function(res) {
+        if (res.code === 200) {
+            myAlert("", "已拒绝邀请", "info");
+            loadSubgroupInvites(); // 刷新邀请列表
+            updateSubgroupInviteCount(); // 更新邀请数量
+        } else {
+            myAlert("", res.message || "拒绝邀请失败", "err");
+        }
+    });
+}
+
+/**
+ * 更新小组邀请数量
+ */
+function updateSubgroupInviteCount() {
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/invites`;
+    
+    ajaxSyncRequest(url, "get", {}, null, function(res) {
+        if (res.code === 200 && res.data) {
+            let count = res.data.length;
+            if (count > 0) {
+                $("#subgroup-invite-count").text(count).removeClass("hide");
+            } else {
+                $("#subgroup-invite-count").addClass("hide");
+            }
+        } else {
+            // API请求失败时隐藏邀请数量显示
+            $("#subgroup-invite-count").addClass("hide");
+            logger.warn("获取小组邀请数量失败:", res.message || "后端服务不可用");
+        }
+    }, function(error) {
+        // Ajax请求失败时的处理（404等错误）
+        $("#subgroup-invite-count").addClass("hide");
+        logger.warn("小组邀请API请求失败，可能是后端服务未启动:", error);
+    });
+}
+
+/**
+ * 发送小组消息
+ */
+function sendSubgroupMessage() {
+    let message = $("#subgroup-input-text").val().trim();
+    if (!message) {
+        return;
+    }
+    
+    // 获取当前小组ID
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/current`;
+    let data = { parentGroupId: chatToUser.groupId };
+    
+    ajaxSyncRequest(url, "get", data, null, function(res) {
+        if (res.code === 200 && res.data) {
+            let subgroupId = res.data.id;
+            
+            // 发送消息
+            let sendUrl = `${MSG_URL_PREFIX}/chat/subgroup/sendMessage`;
+            let sendData = {
+                subgroupId: subgroupId,
+                msgType: "text",
+                content: message
+            };
+            
+            ajaxSyncRequest(sendUrl, "post", sendData, null, function(sendRes) {
+                if (sendRes.code === 200) {
+                    $("#subgroup-input-text").val("");
+                    addSubgroupMessageToUI(message, "self");
+                } else {
+                    myAlert("", sendRes.message || "发送消息失败", "err");
+                }
+            });
+        }
+    });
+}
+
+/**
+ * 添加消息到UI
+ */
+function addSubgroupMessageToUI(message, type) {
+    let messageHtml = `
+        <li class="${type}">
+            ${type === 'other' ? `<div class="subgroup-msg-sender">${chatUser.nickname}</div>` : ''}
+            <div class="subgroup-msg-content">${message}</div>
+            <div class="subgroup-msg-time">${new Date().toLocaleTimeString()}</div>
+        </li>
+    `;
+    
+    $("#subgroup-chat-messages").append(messageHtml);
+    
+    // 滚动到底部
+    let chatContent = $("#subgroup-chat-content")[0];
+    if (chatContent) {
+        chatContent.scrollTop = chatContent.scrollHeight;
+    }
+}
+
+/**
+ * 加载小组消息
+ */
+function loadSubgroupMessages() {
+    // 获取当前小组ID
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/current`;
+    let data = { parentGroupId: chatToUser.groupId };
+    
+    ajaxSyncRequest(url, "get", data, null, function(res) {
+        if (res.code === 200 && res.data) {
+            let subgroupId = res.data.id;
+            
+            // 获取消息列表
+            let msgUrl = `${MSG_URL_PREFIX}/chat/subgroup/messages`;
+            let msgData = { subgroupId: subgroupId, limit: 20 };
+            
+            ajaxSyncRequest(msgUrl, "get", msgData, null, function(msgRes) {
+                if (msgRes.code === 200) {
+                    displaySubgroupMessages(msgRes.data);
+                }
+            });
+        }
+    });
+}
+
+/**
+ * 显示小组消息
+ */
+function displaySubgroupMessages(messages) {
+    let messagesHtml = "";
+    let currentUserId = chatUser.id;
+    
+    if (messages && messages.length > 0) {
+        for (let msg of messages.reverse()) { // 反转消息顺序，最新的在下面
+            let isOwn = msg.sendUserId === currentUserId;
+            let type = isOwn ? "self" : "other";
+            
+            messagesHtml += `
+                <li class="${type}">
+                    ${!isOwn ? `<div class="subgroup-msg-sender">${msg.senderName || '未知用户'}</div>` : ''}
+                    <div class="subgroup-msg-content">${msg.msg}</div>
+                    <div class="subgroup-msg-time">${msg.sendTime}</div>
+                </li>
+            `;
+        }
+    }
+    
+    $("#subgroup-chat-messages").html(messagesHtml);
+    
+    // 滚动到底部
+    let chatContent = $("#subgroup-chat-content")[0];
+    if (chatContent) {
+        chatContent.scrollTop = chatContent.scrollHeight;
+    }
+}
+
+/**
+ * 小组输入框键盘事件
+ */
+function subgroupInputKeydown(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendSubgroupMessage();
+    }
+}
+
+/**
+ * 小组表情点击
+ */
+function subgroupEmojiClick() {
+    myAlert("", "表情功能开发中", "info");
+}
+
+/**
+ * 小组图片点击
+ */
+function subgroupImageClick() {
+    myAlert("", "图片发送功能开发中", "info");
+}
+
+/**
+ * 小组文件点击
+ */
+function subgroupFileClick() {
+    myAlert("", "文件发送功能开发中", "info");
+}
+
+
+
+/**
+ * 初始化小组聊天相关功能
+ */
+function initSubgroupChat() {
+    // 在小组名称输入时检查是否可以创建小组
+    $("#subgroup-name-input").on("input", function() {
+        checkCreateSubgroupEnabled();
+    });
+    
+    // 注册小组聊天窗口双击最小化事件
+    $("#subgroup-chat-window .subgroup-chat-header").dblclick(function() {
+        minimizeSubgroupChat();
+    });
+    
+    // 使小组聊天窗口可拖拽（需要jQuery UI）
+    if ($.fn.draggable) {
+        $("#subgroup-chat-window").draggable({
+            handle: ".subgroup-chat-header",
+            containment: "window"
+        });
+    }
+}
+
+/**
+ * 关闭创建小组对话框
+ */
+function closeCreateSubgroupDialog() {
+    $("#create-subgroup-dialog").hide();
+    $("#chat-msg-info").addClass("hide");
+    
+    // 清空输入内容
+    $("#subgroup-name-input").val("");
+    $(".subgroup-member-list-ul .selected").removeClass("selected");
+    $("#search-subgroup-member-input").val("");
+    checkCreateSubgroupEnabled();
+}
+
+/**
+ * 关闭我的小组对话框
+ */
+function closeMySubgroupDialog() {
+    $("#my-subgroup-dialog").hide();
+    $("#chat-msg-info").addClass("hide");
+}
+
+/**
+ * 关闭小组邀请对话框
+ */
+function closeSubgroupInvitesDialog() {
+    $("#subgroup-invites-dialog").hide();
+    $("#chat-msg-info").addClass("hide");
+}
+
+// 页面加载完成后初始化小组聊天功能
+$(document).ready(function() {
+    initSubgroupChat();
+});
