@@ -1,21 +1,23 @@
 let logger = new Logger('debug');
 
-let env = "dev";// dev:开发环境,test:测试环境,prod:生产环境
-if (location.host !== "www.dot1.chat" && location.host !== "dot1.chat") {
-    env = "local"
-}
-let HOST, BASE_URL; // ws 或 wss;
-
-let ws_port = "443";
+let env = "local";// dev:开发环境,test:测试环境,prod:生产环境
 let ws_protocol = 'ws';
-if (location.host === "www.dot1.chat" || location.host === "dot1.chat") {
-    HOST = "api.dot1.chat";
-    BASE_URL = "https://" + HOST + "/";
-} else {
+let ws_port;
+let HOST;
+let BASE_URL; // ws 或 wss;
+
+if (location.host === "http://ee9b85f3.natappfree.cc"||location.host === "ee9b85f3.natappfree.cc"){
+    HOST = "mfb889c5.natappfree.cc";
+    ws_port = "";
+    BASE_URL = "http://ee9b85f3.natappfree.cc/";
+
+}
+else {
     HOST = "localhost";
     ws_port = "9326";
     BASE_URL = "http://" + HOST + "/";
 }
+
 // 定义常量对象
 const SYS_API_PREFIX = "api/sys"; // 接口前缀
 const MSG_API_PREFIX = "api/msg"; // 接口前缀
