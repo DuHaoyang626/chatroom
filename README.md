@@ -164,6 +164,64 @@ Get-Process -Name "java" -ErrorAction SilentlyContinue
 
 **最终访问地址**: `http://localhost` (使用账号 `18805250558`，密码 `666666`)
 
+### 小组聊天问题修复
+
+#### 1. "未知用户"显示问题修复
+
+**问题现象**: 小组聊天中发送者显示为"未知用户"
+
+**问题原因**: 
+1. SQL查询中的字段别名使用下划线命名（`sender_nickname`），但Java实体类使用驼峰命名（`senderNickname`）
+2. MyBatis字段映射配置不一致
+
+**解决方案**:
+1. **修改SQL查询别名** - 在 `ChatSubgroupMsgDao.java` 中统一使用驼峰命名：
+```sql
+SELECT msg.*, u.nickname as senderNickname, u.avatar as senderAvatar 
+FROM chat_subgroup_msg msg 
+LEFT JOIN chat_user u ON msg.send_user_id = u.id
+```
+
+2. **确保MyBatis配置** - 在 `application.yml` 中已配置：
+```yaml
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+```
+
+3. **前端兜底处理** - 如果后端没有返回昵称，从本地群成员列表获取：
+```javascript
+if (!senderName && !isOwn) {
+    let groupMemberList = getLocalGroupMemberList();
+    if (groupMemberList) {
+        let sender = groupMemberList.find(member => member.userId === msg.sendUserId);
+        if (sender) {
+            senderName = sender.nickname;
+        }
+    }
+}
+```
+
+#### 2. 小组聊天窗口工具栏图标问题修复
+
+**问题现象**: 小组聊天窗口底部意外显示表情、照片、文件图标
+
+**问题原因**: 
+1. 存在冲突的 `subgroup-chat.js` 文件，可能包含旧版本的小组聊天实现
+2. CSS样式冲突或JavaScript代码冲突
+
+**解决方案**:
+1. **删除冲突文件** - 移除 `dot-chat-web/src/main/webapp/js/subgroup-chat.js`
+2. **提高小组聊天窗口层级** - 修改CSS：
+```css
+.subgroup-chat-window {
+    z-index: 9999; /* 原来是1000 */
+    overflow: hidden; /* 防止内容溢出 */
+}
+```
+
+3. **确保功能纯净** - 小组聊天窗口仅支持文本消息，不包含表情、图片、文件功能
+
 ## 功能特性
 - ✅ 用户注册登录
 - ✅ 单聊/群聊
@@ -198,7 +256,9 @@ Get-Process -Name "java" -ErrorAction SilentlyContinue
 - 使用微信绿色主题（#07c160）替代原有蓝色
 - 组长显示特殊标识"(组长)"
 - 组长和普通成员显示不同的操作按钮
+- 小组聊天窗口仅支持文本消息，不支持表情、图片、文件
 - 添加友好的提示信息
+- 点击"小组聊天"直接进入"我的小组"界面，简化操作流程
 
 ## 技术栈
 - **后端**: Spring Boot, MyBatis Plus, TIO WebSocket

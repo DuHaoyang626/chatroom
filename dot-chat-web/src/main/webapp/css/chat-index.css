@@ -3724,9 +3724,39 @@ html, body {
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    z-index: 1000;
+    z-index: 9999;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+}
+
+/* 确保主聊天工具栏不会显示在小组聊天窗口中 */
+.subgroup-chat-window .but-nav {
+    display: none !important;
+}
+
+/* 隐藏小组聊天窗口中任何可能的工具栏按钮 */
+.subgroup-chat-window #nav-face,
+.subgroup-chat-window #nav-picture,
+.subgroup-chat-window #nav-video,
+.subgroup-chat-window #nav-file,
+.subgroup-chat-window #nav-cut,
+.subgroup-chat-window #nav-card,
+.subgroup-chat-window #nav-msgrecord,
+.subgroup-chat-window #nav-audio-call,
+.subgroup-chat-window #nav-video-call,
+.subgroup-chat-window #nav-ai-reply-msg {
+    display: none !important;
+}
+
+/* 隐藏任何包含表情、图片、文件图标的元素 */
+.subgroup-chat-window [alt="表情"],
+.subgroup-chat-window [alt="图片"],
+.subgroup-chat-window [alt="文件"],
+.subgroup-chat-window img[src*="im-face"],
+.subgroup-chat-window img[src*="im-pic"],
+.subgroup-chat-window img[src*="im-file"] {
+    display: none !important;
 }
 
 .subgroup-chat-window.minimized {
@@ -3825,24 +3855,7 @@ html, body {
     border-radius: 0 0 8px 8px;
 }
 
-.subgroup-input-tools {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 8px;
-}
 
-.subgroup-tool-btn {
-    background: none;
-    border: 1px solid #ddd;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-.subgroup-tool-btn:hover {
-    background-color: #f0f0f0;
-}
 
 .subgroup-input-area {
     display: flex;

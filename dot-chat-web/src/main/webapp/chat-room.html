@@ -360,7 +360,27 @@
         </div>
 
         <!-- 小组聊天窗口 -->
-        <div id="subgroup-chat-window" class="subgroup-chat-window hide">
+        <div id="subgroup-chat-window" class="subgroup-chat-window hide" style="isolation: isolate;">
+            <style>
+                /* 强制隐藏小组聊天窗口中的工具栏按钮 */
+                #subgroup-chat-window .but-nav,
+                #subgroup-chat-window #nav-face,
+                #subgroup-chat-window #nav-picture,
+                #subgroup-chat-window #nav-file,
+                #subgroup-chat-window li[id^="nav-"],
+                #subgroup-chat-window img[alt="表情"],
+                #subgroup-chat-window img[alt="图片"],
+                #subgroup-chat-window img[alt="文件"],
+                #subgroup-chat-window img[src*="im-face"],
+                #subgroup-chat-window img[src*="im-pic"],
+                #subgroup-chat-window img[src*="im-file"] {
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                    position: absolute !important;
+                    left: -9999px !important;
+                }
+            </style>
             <div class="subgroup-chat-header">
                 <div class="subgroup-chat-title">
                     <span id="subgroup-chat-name">小组聊天</span>
@@ -377,11 +397,6 @@
                 </ul>
             </div>
             <div class="subgroup-chat-input">
-                <div class="subgroup-input-tools">
-                    <button class="subgroup-tool-btn" onclick="subgroupEmojiClick()">😊</button>
-                    <button class="subgroup-tool-btn" onclick="subgroupImageClick()">📷</button>
-                    <button class="subgroup-tool-btn" onclick="subgroupFileClick()">📁</button>
-                </div>
                 <div class="subgroup-input-area">
                     <textarea id="subgroup-input-text" class="subgroup-input-textarea" 
                               placeholder="输入消息内容..." 

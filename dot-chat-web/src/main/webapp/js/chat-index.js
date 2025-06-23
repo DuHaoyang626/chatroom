@@ -3782,13 +3782,10 @@ function subgroupChatDialogOpen() {
     $("#group-managers-dialog").hide();
     $("#group-notice-textbox-dialog").hide();
     
-    // 显示小组聊天对话框
-    $("#subgroup-chat-dialog").show();
+    // 直接显示我的小组对话框，跳过小组管理菜单
+    mySubgroupDialog();
     
-    // 更新小组邀请数量（已添加错误处理）
-    updateSubgroupInviteCount();
-    
-    logger.info("打开小组聊天管理对话框");
+    logger.info("直接打开我的小组对话框");
 }
 
 /**
@@ -4336,7 +4333,8 @@ function sendSubgroupMessage() {
             ajaxSyncRequest(sendUrl, "post", sendData, null, function(sendRes) {
                 if (sendRes.code === 200) {
                     $("#subgroup-input-text").val("");
-                    addSubgroupMessageToUI(message, "self");
+                    // 重新加载消息列表以获取完整的消息信息
+                    loadSubgroupMessages();
                 } else {
                     myAlert("", sendRes.message || "发送消息失败", "err");
                 }
@@ -4348,10 +4346,10 @@ function sendSubgroupMessage() {
 /**
  * 添加消息到UI
  */
-function addSubgroupMessageToUI(message, type) {
+function addSubgroupMessageToUI(message, type, senderName) {
     let messageHtml = `
         <li class="${type}">
-            ${type === 'other' ? `<div class="subgroup-msg-sender">${chatUser.nickname}</div>` : ''}
+            ${type === 'other' ? `<div class="subgroup-msg-sender">${senderName || '未知用户'}</div>` : ''}
             <div class="subgroup-msg-content">${message}</div>
             <div class="subgroup-msg-time">${new Date().toLocaleTimeString()}</div>
         </li>
@@ -4398,14 +4396,41 @@ function displaySubgroupMessages(messages) {
     let messagesHtml = "";
     let currentUserId = chatUser.id;
     
+    // 添加调试信息
+    console.log("displaySubgroupMessages - 接收到的消息数据:", messages);
+    console.log("当前用户ID:", currentUserId);
+    
     if (messages && messages.length > 0) {
         for (let msg of messages.reverse()) { // 反转消息顺序，最新的在下面
             let isOwn = msg.sendUserId === currentUserId;
             let type = isOwn ? "self" : "other";
             
+            // 调试每条消息的数据
+            console.log("消息数据:", {
+                sendUserId: msg.sendUserId,
+                senderNickname: msg.senderNickname,
+                senderAvatar: msg.senderAvatar,
+                msg: msg.msg,
+                sendTime: msg.sendTime,
+                isOwn: isOwn
+            });
+            
+            // 如果没有发送者昵称，尝试从本地群成员列表获取
+            let senderName = msg.senderNickname;
+            if (!senderName && !isOwn) {
+                let groupMemberList = getLocalGroupMemberList();
+                if (groupMemberList) {
+                    let sender = groupMemberList.find(member => member.userId === msg.sendUserId);
+                    if (sender) {
+                        senderName = sender.nickname;
+                        console.log("从本地群成员列表获取到发送者昵称:", senderName);
+                    }
+                }
+            }
+            
             messagesHtml += `
                 <li class="${type}">
-                    ${!isOwn ? `<div class="subgroup-msg-sender">${msg.senderNickname || '未知用户'}</div>` : ''}
+                    ${!isOwn ? `<div class="subgroup-msg-sender">${senderName || '未知用户'}</div>` : ''}
                     <div class="subgroup-msg-content">${msg.msg}</div>
                     <div class="subgroup-msg-time">${msg.sendTime}</div>
                 </li>
@@ -4432,26 +4457,7 @@ function subgroupInputKeydown(event) {
     }
 }
 
-/**
- * 小组表情点击
- */
-function subgroupEmojiClick() {
-    myAlert("", "表情功能开发中", "info");
-}
 
-/**
- * 小组图片点击
- */
-function subgroupImageClick() {
-    myAlert("", "图片发送功能开发中", "info");
-}
-
-/**
- * 小组文件点击
- */
-function subgroupFileClick() {
-    myAlert("", "文件发送功能开发中", "info");
-}
 
 
 
