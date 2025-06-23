@@ -6,7 +6,7 @@ let ws_port;
 let HOST;
 let BASE_URL; // ws 或 wss;
 
-if (location.host === "http://ee9b85f3.natappfree.cc"||location.host === "ee9b85f3.natappfree.cc"){
+if (location.host === "http://ee9b85f3.natappfree.cc"||location.host === "ee9b85f3.natappfree.cc"||location.host === "https://chat-room-2025.netlify.app"||location.host === "chat-room-2025.netlify.app"||location.host === "http://chat-room-2025.netlify.app"){
     HOST = "mfb889c5.natappfree.cc";
     ws_port = "";
     BASE_URL = "http://ee9b85f3.natappfree.cc/";
