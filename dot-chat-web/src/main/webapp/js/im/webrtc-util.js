@@ -16,7 +16,7 @@ let localMediaStream = null;
 //ice服务器信息, 用于创建 SDP 对象
 let iceServers = {
     "iceServers": [
-        {"urls": "stun:stun.l.google.com:19302"},
+        { "urls": "stun:stun.l.google.com:19302" },
         // {"urls": ["stun:159.75.239.36:3478"]},
         // {"urls": ["turn:159.75.239.36:3478"], "username": "chr", "credential": "123456"},
     ]
@@ -39,8 +39,8 @@ const mediaConstraints = {
  */
 const mediaConstraintsPC = {
     video: {
-        width: {min: 540, ideal: 1215, max: 2048}, // 根据不同屏幕宽度设置
-        height: {min: 480, ideal: 1080, max: 1536},
+        width: { min: 540, ideal: 1215, max: 2048 }, // 根据不同屏幕宽度设置
+        height: { min: 480, ideal: 1080, max: 1536 },
         aspectRatio: 8 / 9
     },
     audio: {
@@ -51,8 +51,8 @@ const mediaConstraintsPC = {
 };
 const mediaConstraintsPC2 = {
     video: {
-        width: {min: 540, ideal: 1215, max: 2048}, // 根据不同屏幕宽度设置
-        height: {min: 480, ideal: 1080, max: 1536},
+        width: { min: 540, ideal: 1215, max: 2048 }, // 根据不同屏幕宽度设置
+        height: { min: 480, ideal: 1080, max: 1536 },
         facingMode: "user", // 用户正面的摄像头
         aspectRatio: 9 / 8
     },
@@ -71,9 +71,9 @@ const mediaConstraintsMobile = {
     video: {
         // width: {min: 1280, ideal: 1920, max: 2048},// TODO 验证 未铺满
         // height: {min: 720, ideal: 1080, max: 1152},
-        width: {min: 640, ideal: 2240},
-        height: {min: 300, ideal: 1050},
-        frameRate: {ideal: 30},  //视频的帧率 30 帧每秒
+        width: { min: 640, ideal: 2240 },
+        height: { min: 300, ideal: 1050 },
+        frameRate: { ideal: 30 },  //视频的帧率 30 帧每秒
         facingMode: "user", // 用户正面的摄像头
         aspectRatio: 16 / 9  // TODO 验证 可以铺满
         // aspectRatio: 16 / 7.5 //*14
@@ -93,7 +93,7 @@ const mediaConstraintsMobile2 = {
     video: {
         // height: {min: 640, ideal: 1280, max: 1920},
         // width: {min: 360, ideal: 720, max: 1080},
-        frameRate: {max: 30},  //视频的帧率最大 30 帧每秒
+        frameRate: { max: 30 },  //视频的帧率最大 30 帧每秒
         facingMode: "user", // 用户正面的摄像头
         aspectRatio: 7.5 / 16 //*14
     },
@@ -133,12 +133,12 @@ function WebRTCInit(msgType) {
     createPeerConnection();
     // 2、绑定 收集 candidate 的回调
     bindOnIceCandidate(candidate => {
-            let {msgId, sendUserId, toUserId} = getMsgIdAndSendUidByRemoteCallDom(msgType);
-            let callType = chatUser.id === parseInt(sendUserId) ? CallType.candidate1[0] : CallType.candidate2[0];
-            // logger.info("收集candidate并发送到对端,callType:", callType, "msgType:", msgType, " msgId:", msgId, " sendUserId:", sendUserId, " toUserId:", toUserId);
-            //发送 candidate 到 对端
-            sendAVCallMsg(new MsgCallO(callType, msgId, candidate), msgType, getToUserId(sendUserId, toUserId));
-        }
+        let { msgId, sendUserId, toUserId } = getMsgIdAndSendUidByRemoteCallDom(msgType);
+        let callType = chatUser.id === parseInt(sendUserId) ? CallType.candidate1[0] : CallType.candidate2[0];
+        // logger.info("收集candidate并发送到对端,callType:", callType, "msgType:", msgType, " msgId:", msgId, " sendUserId:", sendUserId, " toUserId:", toUserId);
+        //发送 candidate 到 对端
+        sendAVCallMsg(new MsgCallO(callType, msgId, candidate), msgType, getToUserId(sendUserId, toUserId));
+    }
     );
     // 3、绑定 获得 远程视频流 的回调
     bindOnTrack(stream => {
@@ -147,7 +147,7 @@ function WebRTCInit(msgType) {
         setVideoDomStream(remoteCallDom, stream);
     });
     bindOnIceConnectionStateChange(() => {
-        let {msgId, sendUserId, toUserId} = getMsgIdAndSendUidByRemoteCallDom(msgType);
+        let { msgId, sendUserId, toUserId } = getMsgIdAndSendUidByRemoteCallDom(msgType);
         logger.info("远端网络异常中断通话,msgType:", msgType, "msgId:", msgId, "sendUserId:", sendUserId, "toUserId:", toUserId);
         //发送挂断信息
         sendAVCallMsg(new MsgCallO(CallType.dropped[0], msgId), msgType, getToUserId(sendUserId, toUserId));
@@ -200,6 +200,7 @@ const openLocalMedia = (constraints, callback, errorFun) => {
             for (const track of localMediaStream.getTracks()) {
                 const settings = track.getSettings();
                 logger.info('Actual video resolution: w:' + settings.width + ', h:' + settings.height);
+                logger.info('addTrack:', track.kind, track);
                 rtcPeerConnection.addTrack(track, localMediaStream);
             }
             // 停止播放铃声
@@ -242,6 +243,9 @@ function openMediaError(err) {
 const createPeerConnection = () => {
     logger.info('创建 PeerConnection 对象');
     rtcPeerConnection = new RTCPeerConnection(iceServers);
+    rtcPeerConnection.addEventListener('connectionstatechange', () => {
+        logger.info('PeerConnection 状态:', rtcPeerConnection.connectionState);
+    });
 }
 
 /**
@@ -288,6 +292,7 @@ const createAnswer = (callback) => {
  * @param callback
  */
 const saveSdp = (desc, callback) => {
+    logger.info('setRemoteDescription:', desc);
     rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(desc))
         .then(callback);
 }
@@ -297,6 +302,7 @@ const saveSdp = (desc, callback) => {
  * @param candidate
  */
 const saveIceCandidate = (candidate) => {
+    logger.info('addIceCandidate:', candidate);
     let iceCandidate = new RTCIceCandidate(candidate);
     rtcPeerConnection.addIceCandidate(iceCandidate)
         .then(() => logger.info('addIceCandidate 成功'));
@@ -357,7 +363,10 @@ const bindOnIceConnectionStateChange = (callback) => {
  */
 const bindOnTrack = (callback) => {
     logger.info('绑定 获得 远程视频流 的回调');
-    rtcPeerConnection.ontrack = (event) => callback(event.streams[0]);
+    rtcPeerConnection.ontrack = (event) => {
+        logger.info('ontrack 被调用, streams:', event.streams, 'track:', event.track);
+        callback(event.streams[0]);
+    };
 };
 
 /**
@@ -430,7 +439,11 @@ function sendInviteCall(msgType) {
         return;
     }
     logger.info("发送通话邀请,msgType:", msgType)
-    sendAVCallMsg(new MsgCallO(CallType.invite[0]), msgType, chatToUser.id);
+    if (msgType === 'GROUP_AUDIO_CALL' || msgType === 'GROUP_VIDEO_CALL') {
+        sendGroupAVCallMsg(new MsgGroupCallO(CallType.invite[0]), msgType, chatToUser.groupId);
+    } else {
+        sendAVCallMsg(new MsgCallO(CallType.invite[0]), msgType, chatToUser.id);
+    }
 }
 
 function isOpenCallDialog() {
@@ -442,10 +455,15 @@ function isOpenCallDialog() {
  * @param msgType
  */
 function acceptCall(msgType) {
-    let {msgId, sendUserId, toUserId} = getMsgIdAndSendUidByRemoteCallDom(msgType);
+    let { msgId, sendUserId, toUserId } = getMsgIdAndSendUidByRemoteCallDom(msgType);
     logger.info("接受通话邀请,msgType:", msgType, "msgId:", msgId, "sendUserId:", sendUserId, "toUserId:", toUserId);
-    sendAVCallMsg(new MsgCallO(CallType.accept[0], msgId, '', '', mobile), msgType, getToUserId(sendUserId, toUserId));
-    // 显示挂断按钮
+    if (msgType === MsgType.GROUP_AUDIO_CALL || msgType === MsgType.GROUP_VIDEO_CALL) {
+        // 群聊通话，发送群聊信令，带上 groupId
+        sendGroupAVCallMsg(new MsgGroupCallO(CallType.accept[0], msgId, chatToUser.groupId, chatUser.id), msgType, chatToUser.groupId);
+    } else {
+        // 私聊通话
+        sendAVCallMsg(new MsgCallO(CallType.accept[0], msgId, '', '', mobile), msgType, getToUserId(sendUserId, toUserId));
+    }
     showAcceptCallBtn();
 }
 
@@ -576,7 +594,7 @@ function acceptCallAndOpenMediaOffer(callMsg) {
             $(localCallDom).removeClass("hide");
         }
         createOffer(desc => {
-            let {msgId, sendUserId, toUserId} = getMsgIdAndSendUidByRemoteCallDom(callMsg.msgType);
+            let { msgId, sendUserId, toUserId } = getMsgIdAndSendUidByRemoteCallDom(callMsg.msgType);
             logger.info('创建并发送 offer ,msgType:', callMsg.msgType, ",msgId:", msgId);
             sendAVCallMsg(new MsgCallO(CallType.offer[0], msgId, '', desc, mobile), callMsg.msgType, getToUserId(sendUserId, toUserId));
             // 开启计时器
@@ -639,7 +657,7 @@ function saveSDPAndOpenMediaAnswer(callMsg) {
             localCallDom.classList.remove("hide");
             //最后创建用于 answer 的 SDP 对象
             createAnswer(desc => {
-                let {msgId, sendUserId, toUserId} = getMsgIdAndSendUidByRemoteCallDom(callMsg.msgType);
+                let { msgId, sendUserId, toUserId } = getMsgIdAndSendUidByRemoteCallDom(callMsg.msgType);
                 logger.info("创建并发送 answer,msgType:", callMsg.msgType, "msgId:", msgId, "sendUserId:", sendUserId, "toUserId:", toUserId);
                 sendAVCallMsg(new MsgCallO(CallType.answer[0], msgId, '', desc), callMsg.msgType, getToUserId(sendUserId, toUserId));
                 // 开启计时器
@@ -668,16 +686,13 @@ function setVideoTrackContentHints(stream, hint) {
 }
 
 function setVideoDomStream(videoDom, stream) {
-    // setVideoTrackContentHints(stream, 'detail');
-    // 旧的浏览器可能没有 srcObject
+    logger.info('setVideoDomStream:', videoDom, stream);
     if ("srcObject" in videoDom) {
         videoDom.srcObject = stream;
     } else {
         window.URL = (window.URL || window.webkitURL || window.mozURL || window.msURL);
-        // 防止在新的浏览器里使用它，应为它已经不再支持了
         videoDom.src = window.URL && window.URL.createObjectURL(stream) || stream
     }
-
 }
 
 function saveRemoteIceCandidate(callMsg) {
@@ -711,7 +726,7 @@ function getMsgIdAndSendUidByRemoteCallDom(msgType) {
     let sendUserId = remoteDom.attr("send-user-id");
     let toUserId = remoteDom.attr("to-user-id");
 
-    return {msgId, sendUserId, toUserId};
+    return { msgId, sendUserId, toUserId };
 }
 
 function getLocalCallDom(msgType) {
@@ -827,7 +842,7 @@ function clearWaitingCallTimer() {
 function waitingAndSendNoAnswer(msgType) {
     //等待接通中的倒计时
     waitingCallTimer = setTimeout(() => {
-        let {msgId, sendUserId, toUserId} = getMsgIdAndSendUidByRemoteCallDom(msgType);
+        let { msgId, sendUserId, toUserId } = getMsgIdAndSendUidByRemoteCallDom(msgType);
         logger.info("30秒后没有收到回应,发送挂断信息,msgType:", msgType, "msgId:", msgId, "sendUserId:", sendUserId, "toUserId:", toUserId);
         // 30秒后没有收到回应, 则发送无人接听消息关闭对话框
         sendAVCallMsg(new MsgCallO(CallType.no_answer[0], msgId), msgType, getToUserId(sendUserId, toUserId));
@@ -839,7 +854,7 @@ function waitingAndSendNoAnswer(msgType) {
  * 发送挂断通话信息
  */
 function hangup(callType, msgType) {
-    let {msgId, sendUserId, toUserId} = getMsgIdAndSendUidByRemoteCallDom(msgType);
+    let { msgId, sendUserId, toUserId } = getMsgIdAndSendUidByRemoteCallDom(msgType);
     logger.info("取消/挂断通话,msgType:", msgType, "msgId:", msgId, "sendUserId:", sendUserId, "toUserId:", toUserId);
     //发送挂断信息
     sendAVCallMsg(new MsgCallO(callType, msgId), msgType, getToUserId(sendUserId, toUserId));
@@ -970,7 +985,7 @@ function switchMinimize(_this) {
     logger.info("切换最小化窗口");
     let callDialog = $(_this).parent();
     callDialog.addClass("call-container-min");
-    callDialog.draggable({containment: "parent"});
+    callDialog.draggable({ containment: "parent" });
     $(".call-dialog-min-ico").addClass("hide");
     if (callState === CallType.invite[0]) {//邀请中显示描述
         $(".call-dialog-min-label").removeClass("hide");

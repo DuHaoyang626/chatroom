@@ -83,6 +83,14 @@ function sendAVCallMsg(contentObj, msgType, toUserId) {
     tiows.send(JSON.stringify(msgObj));
 }
 
+
+function sendGroupAVCallMsg(contentObj, msgType, toGroupId) {
+    // logger.info("发送群聊视频/语音信息,content:", contentObj, "msgType:", msgType, "toGroupId:", toGroupId);
+    let chatType = ChatType.GROUP;
+    let msgObj = new TioMessage(msgType, chatType, contentObj, chatUser.id, toGroupId);
+    tiows.send(JSON.stringify(msgObj));
+}
+
 function checkChatToUser() {
     if (!chatToUser) {
         alert("请选择聊天对象");
