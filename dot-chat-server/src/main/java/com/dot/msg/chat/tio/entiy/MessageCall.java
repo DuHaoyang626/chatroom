@@ -3,7 +3,7 @@ package com.dot.msg.chat.tio.entiy;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.dot.msg.chat.tio.em.CallTypeEm;
 import lombok.Data;
-
+import com.dot.msg.chat.tio.entiy.CallStatus;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Map;
@@ -16,6 +16,7 @@ import java.util.Map;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+
 public class MessageCall implements Serializable {
 
     @Serial
@@ -60,5 +61,21 @@ public class MessageCall implements Serializable {
      * 通话中断方用户ID
      */
     private Integer droppedUserId;
+
+    /**
+     * 群聊成员通话状态映射
+     * key: userId
+     * value: CallStatus（包含接听时间、挂断时间、时长、状态等）
+     */
+    private Map<String, CallStatus> memberStatusMap;
+
+    // getter/setter
+    public Map<String, CallStatus> getMemberStatusMap() {
+        return memberStatusMap;
+    }
+
+    public void setMemberStatusMap(Map<String, CallStatus> memberStatusMap) {
+        this.memberStatusMap = memberStatusMap;
+    }
 
 }

@@ -18,36 +18,38 @@
         <div class="sendto">
             <div class="but-nav">
                 <ul>
-                    <li id="nav-face"><img src="ico/im-face.png" alt="表情"/></li>
+                    <li id="nav-face"><img src="ico/im-face.png" alt="表情" /></li>
                     <li id="nav-picture" onclick="chatMsgPictureClick();">
-                        <img src="ico/im-pic.png" alt="图片"/>
+                        <img src="ico/im-pic.png" alt="图片" />
                     </li>
-                    <input type="file" id="imageInput" style="display: none" accept="image/*"/>
+                    <input type="file" id="imageInput" style="display: none" accept="image/*" />
                     <li id="nav-video" onclick="chatMsgVideoClick();">
-                        <img src="ico/im-video.png" alt="视频"/>
+                        <img src="ico/im-video.png" alt="视频" />
                     </li>
-                    <input type="file" id="videoInput" style="display: none" accept="video/*"/>
+                    <input type="file" id="videoInput" style="display: none" accept="video/*" />
                     <li id="nav-file" onclick="chatMsgFileClick()">
-                        <img src="ico/im-file.png" alt="文件"/>
+                        <img src="ico/im-file.png" alt="文件" />
                     </li>
                     <input type="file" id="fileInput" style="display: none"
-                           accept=".zip,.gzip,.rar,.tar,.7z,.gz,.war,.ios,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.pdf,.xml,.html,.htm,.txt,.md,.log,.css,.mp3,.wma,.wav,.amr,.mp4,.pem,.p12,.mov,.jpg,.jpeg,.gif,.png,.bmp,.tif,.ico"/>
-                    <li id="nav-cut" onclick="changeScreenShot()"><img src="ico/cut.png" alt="截图"/></li>
-                    <li id="nav-card" onclick="openSendCardMsgDialog()"><img src="ico/im-card.png" alt="名片"/></li>
+                        accept=".zip,.gzip,.rar,.tar,.7z,.gz,.war,.ios,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.pdf,.xml,.html,.htm,.txt,.md,.log,.css,.mp3,.wma,.wav,.amr,.mp4,.pem,.p12,.mov,.jpg,.jpeg,.gif,.png,.bmp,.tif,.ico" />
+                    <li id="nav-cut" onclick="changeScreenShot()"><img src="ico/cut.png" alt="截图" /></li>
+                    <li id="nav-card" onclick="openSendCardMsgDialog()"><img src="ico/im-card.png" alt="名片" /></li>
                     <li id="nav-msgrecord" onclick="openChatMsgHistoryDialog()">
-                        <img src="ico/msg.png" alt="历史记录"/>
+                        <img src="ico/msg.png" alt="历史记录" />
                     </li>
-                    <li id="nav-audio-call" class="call" onclick="sendInviteCall('AUDIO_CALL')">
-                        <img src="ico/call_audio_pc.png" alt="语音通话"/></li>
+                    <!--                    <li id="nav-audio-call" class="call" onclick="sendInviteCall('AUDIO_CALL')">-->
+                    <li id="nav-audio-call" class="video_call"
+                        onclick="sendInviteCall(chatToUser.groupId && chatToUser.groupId > 0 ? 'GROUP_AUDIO_CALL' : 'AUDIO_CALL')">
+                        <img src="ico/call_audio_pc.png" alt="语音通话" />
+                    </li>
                     <li id="nav-video-call" class="call" onclick="sendInviteCall('VIDEO_CALL')">
-                        <img src="ico/call_video_pc.png" alt="视频通话"/></li>
-                    <li id="nav-ai-reply-msg" class="ai-reply-msg">
-                        <img class="ai-reply-msg-icon" src="ico/ai_icon.png" alt="Ai智能回复"/></li>
+                        <img src="ico/call_video_pc.png" alt="视频通话"/>
+                    </li>
                 </ul>
             </div>
             <div class="but-text">
                 <textarea id="content-input" class="content-input" cols="110" rows="6" disabled
-                          placeholder="请输入消息内容，按Enter键或发送按钮发送，按Ctrl+Enter换行"></textarea>
+                    placeholder="请输入消息内容，按Enter键或发送按钮发送，按Ctrl+Enter换行"></textarea>
                 <button id="send-msg-btn" class="button" onclick="sendMsg()" disabled>发送</button>
             </div>
             <div class="ui-widget-overlay ui-front dissolve-mask hide" style="z-index: 100;">群聊已解散</div>
@@ -140,10 +142,10 @@
         <div id="modify-group-name-dialog" class="modify-group-name" style="display: none">
             <div class="modify-group-desc">修改群名称后，将在群内通知其他成员。</div>
             <div class="modify-group-name-content">
-                <img id="modify-group-avatar" src="" alt=""/>
+                <img id="modify-group-avatar" src="" alt="" />
                 <input id="modify-group-name-input" class="modify-group-name-input" type="text"
-                       onchange="groupNameInputChange(this)"
-                       onfocusout="groupNameInputChange(this)" onkeyup="groupNameInputChange(this)"/>
+                    onchange="groupNameInputChange(this)" onfocusout="groupNameInputChange(this)"
+                    onkeyup="groupNameInputChange(this)" />
                 <span class="clean-input" onclick="clearGroupNameInput()"></span>
             </div>
             <div class="modify-group-name-btn">
@@ -153,7 +155,7 @@
         </div>
         <!-- 群二维码对话框 -->
         <div id="group-qrcode-dialog" class="group-qrcode-dialog" style="display: none">
-            <img id="group-qrcode-img" class="group-qrcode-img" src="" alt=""/>
+            <img id="group-qrcode-img" class="group-qrcode-img" src="" alt="" />
             <div class="group-qrcode-label">该二维码24小时内有效，重新进入将更新</div>
             <div class="group-qrcode-btn">
                 <button class="primarybtn" onclick="downloadGroupQrcode()">保存</button>
@@ -164,7 +166,7 @@
             <div class="add-remove-group-member">
                 <div class="user-search">
                     <div class="search-content">
-                        <input id="search-u-input" class="search-input" type="text" placeholder="输入手机号或昵称"/>
+                        <input id="search-u-input" class="search-input" type="text" placeholder="输入手机号或昵称" />
                     </div>
                     <button class="primarybtn" onclick="searchUserClick()">查找</button>
                 </div>
@@ -215,7 +217,7 @@
             <div class="chat-msg-info-set">
                 <div class="group-info">
                     <label class="info-title">群聊邀请确认
-                        <br/>
+                        <br />
                         <span class="group-invite-desc">启用后，群成员需群主或群管理员确认才能邀请朋友进群。</span>
                     </label>
                     <div class="base-info-right">
@@ -264,7 +266,7 @@
                 </div>
                 <div class="user-search">
                     <div class="search-content">
-                        <input id="search-group-input" class="search-input" type="text" placeholder="输入手机号或昵称"/>
+                        <input id="search-group-input" class="search-input" type="text" placeholder="输入手机号或昵称" />
                     </div>
                     <button class="primarybtn" onclick="searchGroupMemberClick()">查找</button>
                 </div>
@@ -435,7 +437,7 @@
         <div class="chat-msg-history-title">
             <div class="user-search">
                 <div class="search-content">
-                    <input id="search-msg-input" class="search-input" type="text" placeholder="输入聊天内容"/>
+                    <input id="search-msg-input" class="search-input" type="text" placeholder="输入聊天内容" />
                 </div>
                 <button class="primarybtn" onclick="searchMsgHistoryClick()">查找</button>
             </div>
@@ -468,7 +470,7 @@
         <div class="relay-msg-user">
             <div class="user-search">
                 <div class="search-content">
-                    <input id="relay-keyword-input" class="search-input" type="text" placeholder="输入昵称"/>
+                    <input id="relay-keyword-input" class="search-input" type="text" placeholder="输入昵称" />
                 </div>
                 <button class="primarybtn" onclick="searchRelayUserList()">查找</button>
             </div>
@@ -500,7 +502,7 @@
         <div class="ui-widget-overlay ui-front video-mask"></div>
         <div class="video-play">
             <video id="video" src="" preload="auto" controls="controls" autoplay="autoplay"></video>
-            <img onclick="closeVideo()" class="video-close" src="./ico/x-red.png" width="25" height="25" alt="关闭"/>
+            <img onclick="closeVideo()" class="video-close" src="./ico/x-red.png" width="25" height="25" alt="关闭" />
         </div>
     </div>
 

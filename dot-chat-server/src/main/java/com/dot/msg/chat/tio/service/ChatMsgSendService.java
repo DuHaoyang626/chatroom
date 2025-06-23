@@ -32,12 +32,18 @@ import org.tio.core.ChannelContext;
 import org.tio.core.Tio;
 import org.tio.core.TioConfig;
 import org.tio.websocket.common.WsResponse;
+import com.dot.msg.chat.tio.entiy.CallStatus;
+import com.dot.msg.chat.tio.em.SocketTypePacketEm;
+import com.dot.msg.chat.tio.entiy.TioPacket;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 聊天信息发送服务
@@ -74,7 +80,6 @@ public class ChatMsgSendService {
             log.error("添加聊天记录失败,message:{}", message);
         }
     }
-
 
     private void addChatRoomAndSetChatId(TioMessage message) {
         String chatId = getChatId(message);
@@ -115,19 +120,23 @@ public class ChatMsgSendService {
         List<Integer> noChatRoomUserIds = new ArrayList<>();
         if (ChatTypeEm.SINGLE == message.getChatType()) {
             List<ChatRoomUserRel> chatRoomUserRelList = chatRoomService.getChatRoomUserRelListByChatId(chatId);
-            Optional<ChatRoomUserRel> first = chatRoomUserRelList.stream().filter(rel -> rel.getUserId().equals(message.getSendUserId())).findFirst();
+            Optional<ChatRoomUserRel> first = chatRoomUserRelList.stream()
+                    .filter(rel -> rel.getUserId().equals(message.getSendUserId())).findFirst();
             if (first.isEmpty()) {
                 noChatRoomUserIds.add(message.getSendUserId());
             }
-            Optional<ChatRoomUserRel> first2 = chatRoomUserRelList.stream().filter(rel -> rel.getUserId().equals(message.getToUserId())).findFirst();
+            Optional<ChatRoomUserRel> first2 = chatRoomUserRelList.stream()
+                    .filter(rel -> rel.getUserId().equals(message.getToUserId())).findFirst();
             if (first2.isEmpty()) {
                 noChatRoomUserIds.add(message.getToUserId());
             }
         } else {
-            List<ChatGroupMember> groupMemberList = chatGroupMemberService.getChatGroupMemberListByGroupId(message.getToUserId());
+            List<ChatGroupMember> groupMemberList = chatGroupMemberService
+                    .getChatGroupMemberListByGroupId(message.getToUserId());
             List<ChatRoomUserRel> chatRoomUserRelList = chatRoomService.getChatRoomUserRelListByChatId(chatId);
             groupMemberList.forEach(groupMember -> {
-                Optional<ChatRoomUserRel> first = chatRoomUserRelList.stream().filter(rel -> rel.getUserId().equals(groupMember.getUserId())).findFirst();
+                Optional<ChatRoomUserRel> first = chatRoomUserRelList.stream()
+                        .filter(rel -> rel.getUserId().equals(groupMember.getUserId())).findFirst();
                 if (first.isEmpty()) {
                     noChatRoomUserIds.add(groupMember.getUserId());
                 }
@@ -138,13 +147,15 @@ public class ChatMsgSendService {
 
     private Integer saveOrUpdateRetMsgId(ChannelContext channelContext, TioMessage message) {
         Integer msgId = null;
-        if (message.getMsgType() == MsgTypeEm.VIDEO_CALL || message.getMsgType() == MsgTypeEm.AUDIO_CALL) {
+        if (message.getMsgType() == MsgTypeEm.VIDEO_CALL || message.getMsgType() == MsgTypeEm.AUDIO_CALL
+                || message.getMsgType() == MsgTypeEm.GROUP_AUDIO_CALL
+                || message.getMsgType() == MsgTypeEm.GROUP_VIDEO_CALL) {
             MessageCall messageCall = JSON.parseObject(message.getMsg(), MessageCall.class);
             if (messageCall.getMsgId() != null) { // 消息ID不为空时,更新聊天记录内容
                 msgId = messageCall.getMsgId();
                 setDurationAndUpdateChatMsg(channelContext, message, messageCall);
             } else if (messageCall.getCallType() == CallTypeEm.invite) { // 接到通话邀请时判断是否忙线中
-                msgId = getNewMsgId(message, messageCall);
+                msgId = getNewMsgId(channelContext, message, messageCall);
             }
         }
         if (msgId == null) {
@@ -154,43 +165,55 @@ public class ChatMsgSendService {
         return msgId;
     }
 
-    private Integer getNewMsgId(TioMessage message, MessageCall messageCall) {
-        String callingKey = CommConstant.CHAT_MSG_CALLING_KEY + message.getToUserId();
-        if (redisUtil.exists(callingKey)) {// 对方正忙
-            String lastMsgIdStr = redisUtil.get(callingKey);
-            int lastMsgId = Integer.parseInt(lastMsgIdStr);
-            ChatMsg lastChatMsg = chatMsgService.get(lastMsgId);
-            if (lastChatMsg.getSendUserId().equals(message.getSendUserId())) { // 和上次发送信息方是同一个人,则更新
-                updateLastChatMsg(message, lastChatMsg, lastMsgId);
-            } else {
-                messageCall.setCallType(CallTypeEm.busying);
-                message.setMsg(JSON.toJSONString(messageCall));
+    private Integer getNewMsgId(ChannelContext channelContext, TioMessage message, MessageCall messageCall) {
+        Integer msgId;
+        TioPacket packet = new TioPacket(SocketTypePacketEm.CHAT.getType(),
+                message.toString().getBytes(StandardCharsets.UTF_8));
+        if (ChatTypeEm.GROUP == message.getChatType()) {
+            List<Integer> memberIds = chatGroupMemberService.getChatGroupMemberIdListByGroupId(message.getToUserId());
+            // 移除发送者
+            memberIds = memberIds.stream().filter(id -> !id.equals(message.getSendUserId()))
+                    .collect(Collectors.toList());
+            if (isBusy(memberIds)) {
+                Tio.sendToUser(channelContext.getTioConfig(), String.valueOf(message.getSendUserId()),
+                        WsResponse.fromText("对方有人正在通话中,请稍后再试", StandardCharsets.UTF_8.name()));
                 return null;
             }
+            // 保存聊天记录
+            msgId = saveChatMsg(message);
+            messageCall.setMsgId(msgId);
+            message.setMsg(JSON.toJSONString(messageCall));
+            // 设置所有人为拨号中
+            for (Integer memberId : memberIds) {
+                redisUtil.set(CommConstant.CHAT_MSG_CALLING_KEY + memberId, String.valueOf(msgId), 60L);
+            }
+        } else {
+            if (isBusy(message.getToUserId())) {
+                Tio.sendToUser(channelContext.getTioConfig(), String.valueOf(message.getSendUserId()),
+                        WsResponse.fromText("对方正在通话中,请稍后再试", StandardCharsets.UTF_8.name()));
+                return null;
+            }
+            // 保存聊天记录
+            msgId = saveChatMsg(message);
+            messageCall.setMsgId(msgId);
+            message.setMsg(JSON.toJSONString(messageCall));
+            redisUtil.set(CommConstant.CHAT_MSG_CALLING_KEY + message.getToUserId(), String.valueOf(msgId), 60L);
         }
-        // 保存聊天记录
-        Integer msgId = saveChatMsg(message);
-        // 缓存通话信息
-        cacheMsgIdToRedis(message, msgId);
+        redisUtil.set(CommConstant.CHAT_MSG_CALLING_KEY + message.getSendUserId(), String.valueOf(msgId), 60L);
         return msgId;
     }
 
     private void updateLastChatMsg(TioMessage message, ChatMsg lastChatMsg, int lastMsgId) {
-        // 移除缓存
-        removeRedisCache(message);
-        MessageCall lastMsgCall = JSON.parseObject(lastChatMsg.getMsg(), MessageCall.class);
-        if (lastMsgCall.getCallType() == CallTypeEm.invite) {
-            lastMsgCall.setCallType(CallTypeEm.no_answer);
-        } else if (lastMsgCall.getCallType() == CallTypeEm.accept
-                   || lastMsgCall.getCallType() == CallTypeEm.offer
-                   || lastMsgCall.getCallType() == CallTypeEm.answer
-                   || lastMsgCall.getCallType() == CallTypeEm.candidate1
-                   || lastMsgCall.getCallType() == CallTypeEm.candidate2) {
-            lastMsgCall.setCallType(CallTypeEm.dropped);
+        if (lastChatMsg.getSendUserId().equals(message.getSendUserId())) {
+            // 更新最后一条聊天记录
+            lastChatMsg.setMsg(message.getMsg());
+            chatMsgService.updateById(lastChatMsg);
+            WsResponse wsResponse = WsResponse.fromText("更新通话信令成功", StandardCharsets.UTF_8.name());
+            Tio.sendToUser(null, String.valueOf(message.getSendUserId()), wsResponse);
         } else {
-            return;
+            WsResponse wsResponse = WsResponse.fromText("对方正在通话中,请稍后再试", StandardCharsets.UTF_8.name());
+            Tio.sendToUser(null, String.valueOf(message.getSendUserId()), wsResponse);
         }
-        updateChatMsg(lastMsgId, JSON.toJSONString(lastMsgCall));
     }
 
     private void removeRedisCache(TioMessage message) {
@@ -207,15 +230,65 @@ public class ChatMsgSendService {
     }
 
     private void setDurationAndUpdateChatMsg(ChannelContext channelContext, TioMessage message,
-                                             MessageCall messageCall) {
+            MessageCall messageCall) {
         Integer msgId = messageCall.getMsgId();
         ChatMsg chatMsg = chatMsgService.getById(msgId);
         MessageCall oldCall = JSON.parseObject(chatMsg.getMsg(), MessageCall.class);
         oldCall.setCallType(messageCall.getCallType());
         oldCall.setMsgId(msgId);
+
+        // 群聊分支
+        if (ChatTypeEm.GROUP.name().equals(chatMsg.getChatType())) {
+            List<Integer> memberIds = chatGroupMemberService.getChatGroupMemberIdListByGroupId(chatMsg.getGroupId());
+            Map<String, CallStatus> memberStatusMap = oldCall.getMemberStatusMap();
+            if (memberStatusMap == null) {
+                memberStatusMap = new java.util.HashMap<>();
+                for (Integer memberId : memberIds) {
+                    memberStatusMap.put(String.valueOf(memberId), new CallStatus());
+                }
+            }
+            CallStatus status = memberStatusMap.get(message.getSendUserId());
+            if (status == null) {
+                status = new CallStatus();
+            }
+            if (messageCall.getCallType() == CallTypeEm.accept) {
+                status.setStatus("已接听");
+                status.setAcceptTime(DateUtil.now());
+            } else if (messageCall.getCallType() == CallTypeEm.hangup
+                    || messageCall.getCallType() == CallTypeEm.dropped) {
+                status.setStatus("已挂断");
+                status.setHangupTime(DateUtil.now());
+                if (org.apache.commons.lang3.StringUtils.isNotBlank(status.getAcceptTime())) {
+                    status.setDuration((int) ((DateUtil.date().getTime()
+                            - DateUtil.parseDateTime(status.getAcceptTime()).getTime()) / 1000));
+                }
+            } else if (messageCall.getCallType() == CallTypeEm.cancel) {
+                status.setStatus("已取消");
+            } else if (messageCall.getCallType() == CallTypeEm.reject) {
+                status.setStatus("已拒绝");
+            }
+
+            memberStatusMap.put(String.valueOf(message.getSendUserId()), status);
+            oldCall.setMemberStatusMap(memberStatusMap);
+
+            boolean allHandled = memberStatusMap.values().stream()
+                    .allMatch(s -> s.getStatus() != null && (s.getStatus().equals("已挂断") || s.getStatus().equals("已取消")
+                            || s.getStatus().equals("已拒绝")));
+
+            if (allHandled) {
+                for (Integer memberId : memberIds) {
+                    redisUtil.remove(CommConstant.CHAT_MSG_CALLING_KEY + memberId);
+                }
+            }
+
+            updateChatMsg(msgId, JSON.toJSONString(oldCall));
+            return;
+        }
+
+        // 私聊原有逻辑
         if (oldCall.getCallType() == CallTypeEm.accept) {
             oldCall.setAcceptTime(DateUtil.now());
-            if (TioUtil.isOffline(channelContext.tioConfig, message.getToUserId().toString())) {// 接受通话时,对方不在线中断通话
+            if (TioUtil.isOffline(channelContext.tioConfig, message.getToUserId().toString())) {
                 oldCall.setDuration(0);
                 oldCall.setHangupTime(DateUtil.now());
                 oldCall.setCallType(CallTypeEm.dropped);
@@ -225,8 +298,9 @@ public class ChatMsgSendService {
         } else if (oldCall.getCallType() == CallTypeEm.hangup || oldCall.getCallType() == CallTypeEm.dropped) {
             DateTime now = DateUtil.date();
             oldCall.setHangupTime(now.toString());
-            if (StringUtils.isNotBlank(oldCall.getAcceptTime())) {
-                oldCall.setDuration((int) ((now.getTime() - DateUtil.parseDateTime(oldCall.getAcceptTime()).getTime()) / 1000));
+            if (org.apache.commons.lang3.StringUtils.isNotBlank(oldCall.getAcceptTime())) {
+                oldCall.setDuration(
+                        (int) ((now.getTime() - DateUtil.parseDateTime(oldCall.getAcceptTime()).getTime()) / 1000));
             } else {
                 log.warn("挂断时通话接通时间为空,oldCall:{}", oldCall);
             }
@@ -236,21 +310,18 @@ public class ChatMsgSendService {
             message.setMsgType(MsgTypeEm.getMsgType(chatMsg.getMsgType()));
         }
         if (oldCall.getCallType() == CallTypeEm.hangup
-            || oldCall.getCallType() == CallTypeEm.refuse
-            || oldCall.getCallType() == CallTypeEm.cancel
-            || oldCall.getCallType() == CallTypeEm.no_answer
-            || oldCall.getCallType() == CallTypeEm.dropped) {
-            // 删除通话中标识
+                || oldCall.getCallType() == CallTypeEm.reject
+                || oldCall.getCallType() == CallTypeEm.cancel
+                || oldCall.getCallType() == CallTypeEm.no_answer
+                || oldCall.getCallType() == CallTypeEm.dropped) {
             redisUtil.remove(CommConstant.CHAT_MSG_CALLING_KEY + chatMsg.getSendUserId());
             redisUtil.remove(CommConstant.CHAT_MSG_CALLING_KEY + chatMsg.getToUserId());
-
-            if (!message.getSendUserId().equals(chatMsg.getSendUserId())) { // 保障最开始的发送方为通话发起方
+            if (!message.getSendUserId().equals(chatMsg.getSendUserId())) {
                 message.setSendUserId(chatMsg.getSendUserId());
                 message.setToUserId(chatMsg.getSendUserId());
             }
         }
         message.setId(msgId);
-        // 更新聊天记录内容
         updateChatMsg(msgId, JSON.toJSONString(oldCall));
     }
 
@@ -306,5 +377,18 @@ public class ChatMsgSendService {
     public void sendToGroup(TioConfig tioConfig, TioMessage message) {
         WsResponse meResponse = WsResponse.fromText(message.toString(), StandardCharsets.UTF_8.name());
         Tio.sendToGroup(tioConfig, message.getToUserId().toString(), meResponse);
+    }
+
+    private boolean isBusy(Integer userId) {
+        return redisUtil.exists(CommConstant.CHAT_MSG_CALLING_KEY + userId);
+    }
+
+    private boolean isBusy(List<Integer> userIds) {
+        for (Integer userId : userIds) {
+            if (redisUtil.exists(CommConstant.CHAT_MSG_CALLING_KEY + userId)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

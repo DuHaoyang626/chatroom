@@ -81,7 +81,9 @@ const MsgType = {
     HEART_BEAT: "HEART_BEAT", // 心跳监消息
     NOTICE: "NOTICE", // 通知消息
     VIDEO_CALL: "VIDEO_CALL", //视频通话
-    AUDIO_CALL: "AUDIO_CALL" //语音通话
+    AUDIO_CALL: "AUDIO_CALL",//语音通话
+    GROUP_AUDIO_CALL: "GROUP_AUDIO_CALL",//群语音通话
+    GROUP_VIDEO_CALL: "GROUP_VIDEO_CALL"//群视频通话
 };
 
 /**
@@ -215,6 +217,27 @@ function MsgCallO(callType, msgId, candidate, desc, mobile) {
 }
 
 /**
+ * 群聊通话消息对象(群语音/群视频)
+ * @param callType 通话类型
+ * @param msgId 消息ID
+ * @param groupId 群聊ID
+ * @param fromUserId 发起人ID
+ * @param candidate 候选者对象
+ * @param desc 创建offer或answer产生session描述对象
+ * @param mobile 是否移动端发起
+ * @constructor
+ */
+function MsgGroupCallO(callType, msgId, groupId, fromUserId, candidate, desc, mobile) {
+    this.callType = callType;
+    this.msgId = msgId;
+    this.groupId = groupId;
+    this.fromUserId = fromUserId;
+    this.mobile = mobile;
+    this.candidate = candidate;
+    this.desc = desc;
+}
+
+/**
  * 通话消息类型枚举,(描述1:通话发起方描述,描述2:通话接收方描述)
  * @type {{cancel: string[], offer: string[], candidate: string[], refuse: string[], answer: string[], no_answer: string[], invite: string[], accept: string[], hangup: string[]}}
  */
@@ -252,7 +275,7 @@ function getCallTypeDesc(sendUserId, type) {
  * @returns {{fileName: string, newFileName: string, fileUrl: string}}
  */
 function msgParseJson(chatMsg) {
-    let msgObj = {fileName: "", fileUrl: "", newFileName: ""};
+    let msgObj = { fileName: "", fileUrl: "", newFileName: "" };
     if (chatMsg.msgType === MsgType.IMAGE || chatMsg.msgType === MsgType.VIDEO || chatMsg.msgType === MsgType.FILE) {
         msgObj = JSON.parse(chatMsg.msg);
     }
@@ -805,7 +828,7 @@ function userFriendListSearch(keyword, filterGroupId, successFn) {
 
 function getChatUserInfo(userId, callback) {
     let url = `${MSG_URL_PREFIX}/chat/user/info`;
-    ajaxSyncRequest(url, "get", {userId: userId}, null, function (res) {
+    ajaxSyncRequest(url, "get", { userId: userId }, null, function (res) {
         if (res.code !== 200) {
             logger.error("获取用户详情失败,userId:", userId, "res:", res);
             myAlert('', res.message, "err");
@@ -823,7 +846,7 @@ function getChatGroupMemberList(groupId) {
         return;
     }
     let url = `${MSG_URL_PREFIX}/chat/group/member/list`;
-    ajaxSyncRequest(url, "get", {groupId: groupId}, null, function (res) {
+    ajaxSyncRequest(url, "get", { groupId: groupId }, null, function (res) {
         if (res.code !== 200) {
             myAlert('', res.message, "err");
             return;
@@ -1682,4 +1705,27 @@ let callHangupRingtoneAudio = new Audio('../mp3/call-hangup-ringtone.mp3');
  */
 function plaCallHangupRingtone() {
     callHangupRingtoneAudio.play();
+}
+
+function getMsgDom(user2, chatMsg) {
+    let msgDom = ``;
+    if (chatMsg.msgType === MsgType.IMAGE) {
+        msgDom = getImgMsgDom(chatMsg);
+    } else if (chatMsg.msgType === MsgType.VIDEO) {
+        msgDom = getVideoMsgDom(chatMsg);
+    } else if (chatMsg.msgType === MsgType.FILE) {
+        msgDom = getFileMsgDom(chatMsg);
+    } else if (chatMsg.msgType === MsgType.BIZ_CARD || chatMsg.msgType === MsgType.GROUP_BIZ_CARD) {
+        msgDom = getCardMsgDom(chatMsg);
+    } else if (
+        chatMsg.msgType === MsgType.VIDEO_CALL ||
+        chatMsg.msgType === MsgType.AUDIO_CALL ||
+        chatMsg.msgType === MsgType.GROUP_AUDIO_CALL ||
+        chatMsg.msgType === MsgType.GROUP_VIDEO_CALL
+    ) {
+        msgDom = getCallMsgDom(user2, chatMsg);
+    } else {
+        msgDom = getTextMsgDom(chatMsg);
+    }
+    return msgDom;
 }

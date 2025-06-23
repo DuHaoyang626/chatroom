@@ -75,4 +75,10 @@ public class ChatUserInfoResponse implements Serializable {
 	 */
 	@Schema(description = "是否是好友")
 	private Boolean isFriend;
+
+	/**
+	 * 是否在线
+	 */
+	@Schema(description = "是否在线")
+	private Boolean isOnline;
 }

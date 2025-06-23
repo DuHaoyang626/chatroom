@@ -1535,7 +1535,7 @@ function getChatUserInfoDom(_this) {
 
         $("#container").html("").append(infoDom);
         $(".footer").removeClass("show").addClass("hide");
-        $(".header .left-arrow").removeClass("hide").addClass("show").attr("action", $(_this).attr("action"));
+        $(".header .left-arrow").removeClass("hide").addClass("show").attr("action", "friend");
         $(".header .nickname").text("好友");
         $("#add-operation").addClass("hide").removeClass("show");
     });
@@ -2418,7 +2418,7 @@ function registerGroupManagerTouchEvent() {
 function removeGroupManager(_this) {
     let nickname = $(_this).attr("nickname");
     let userId = $(_this).attr("user-id");
-    myConfirm('确定移除群管理员吗?', "确定要移除“" + nickname + "”管理员吗?", function () {
+    myConfirm('确定移除群管理员吗?', "确定要移除" + nickname + "管理员吗?", function () {
         let url = `${MSG_URL_PREFIX}/chat/group/removeGroupManager`;
         ajaxRequest(url, "post", {
             groupId: chatToUser.groupId,
@@ -2464,7 +2464,7 @@ function addGroupManager(_this) {
     }
     let nickname = $(_this).attr("nickname");
     let userId = $(_this).attr("user-id");
-    myConfirm('确定添加群管理员吗?', "确定要添加“" + nickname + "”为管理员吗?", function () {
+    myConfirm('确定添加群管理员吗?', "确定要添加" + nickname + "为管理员吗?", function () {
         let url = `${MSG_URL_PREFIX}/chat/group/addGroupManager`;
         ajaxRequest(url, "post", {
             groupId: chatToUser.groupId,
@@ -2535,10 +2535,10 @@ function loadChatMsgHistory() {
         if (statusTxt === "success") {
             logger.info("外部HTML[chat-msg-history.html]加载成功！");
             if (parseInt(chatToUser.groupId) > 0) {
-                $(".header .nickname").text("“" + chatToUser.nickname + "”的聊天记录");
+                $(".header .nickname").text("" + chatToUser.nickname + "的聊天记录");
                 initGroupMemberSelectOption();
             } else {
-                $(".header .nickname").text("与“" + chatToUser.nickname + "”的聊天记录");
+                $(".header .nickname").text("与" + chatToUser.nickname + "的聊天记录");
                 $("#msg-group-member-select").parent().remove();
             }
             //初始化日期选择器
@@ -3221,6 +3221,7 @@ function agreeFriendApply() {
  * 获取好友列表
  */
 function getFriendList() {
+    console.log('getFriendList called');
     let url = `${MSG_URL_PREFIX}/chat/friend/list`;
     ajaxRequest(url, "get", {}, null, function (res) {
         if (res.code !== 200) {
@@ -3243,6 +3244,7 @@ function getFriendList() {
                 <div class="friend-info" friend-id="${friend.friendId}" onclick="goFriendInfoPage(this);">
                     <div class="friend-head">
                         <img class="friend-avatar" src="${friend.avatar}" alt=""/>
+                        <span class="online-dot ${friend.isOnline ? 'online' : 'offline'}"></span>
                     </div>
                     <div class="friend-right">
                         <div class="friend-title">

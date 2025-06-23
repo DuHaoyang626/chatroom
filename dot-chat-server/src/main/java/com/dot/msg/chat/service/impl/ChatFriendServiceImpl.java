@@ -89,8 +89,10 @@ public class ChatFriendServiceImpl extends ServiceImpl<ChatFriendDao, ChatFriend
         if (CollUtil.isEmpty(chatUserFriendList)) {
             return Collections.emptyList();
         }
-        // 把首字母为“_”替换为“#”
+        // 把首字母为"_"替换为"#"
         replaceLastLatter(chatUserFriendList);
+        // 在线用户排前面，离线用户排后面
+        chatUserFriendList.sort(java.util.Comparator.comparing(ChatUserFriendDto::getIsOnline, java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())));
         return BeanUtil.copyToList(chatUserFriendList, ChatUserFriendResponse.class);
     }
 
@@ -115,6 +117,7 @@ public class ChatFriendServiceImpl extends ServiceImpl<ChatFriendDao, ChatFriend
         }
         ChatUserFriendInfoResponse response = BeanUtil.copyProperties(chatUserFriendDto, ChatUserFriendInfoResponse.class);
         response.setSourceDesc(ChatSourceEm.getDesc(chatUserFriendDto.getSource()));
+        response.setIsOnline(chatUserFriendDto.getIsOnline());
         return response;
     }
 

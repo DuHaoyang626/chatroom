@@ -78,9 +78,9 @@
     <div id="modify-group-name-dialog" class="modify-group-name" style="display: none">
         <div class="modify-group-desc">修改群名称后，将在群内通知其他成员。</div>
         <div class="modify-group-name-content">
-            <img id="modify-group-avatar" src="" alt=""/>
+            <img id="modify-group-avatar" src="" alt="" />
             <input id="modify-group-name-input" type="text" onchange="groupNameInputChange(this)"
-                   onfocusout="groupNameInputChange(this)" onkeyup="groupNameInputChange(this)"/>
+                onfocusout="groupNameInputChange(this)" onkeyup="groupNameInputChange(this)" />
             <span class="clean-input" onclick="clearGroupNameInput()"></span>
         </div>
         <div class="modify-group-name-btn">
@@ -89,7 +89,7 @@
     </div>
     <!-- 群二维码对话框 -->
     <div id="group-qrcode-dialog" class="group-qrcode-dialog" style="display: none">
-        <img id="group-qrcode-img" src="" alt=""/>
+        <img id="group-qrcode-img" src="" alt="" />
         <div class="group-qrcode-label">该二维码24小时内有效，重新进入将更新</div>
         <div class="group-qrcode-btn">
             <button class="primarybtn" onclick="downloadGroupQrcode()">保存</button>
@@ -100,7 +100,7 @@
         <div class="add-remove-group-member">
             <div class="user-search">
                 <div class="search-content">
-                    <input id="search-u-input" class="search-input" type="text" placeholder="输入手机号或昵称"/>
+                    <input id="search-u-input" class="search-input" type="text" placeholder="输入手机号或昵称" />
                 </div>
                 <button class="primarybtn" onclick="searchUserClick()">查找</button>
             </div>
@@ -130,7 +130,7 @@
             </div>
             <div class="user-search">
                 <div class="search-content">
-                    <input id="search-group-input" class="search-input" type="text" placeholder="输入手机号或昵称"/>
+                    <input id="search-group-input" class="search-input" type="text" placeholder="输入手机号或昵称" />
                 </div>
                 <button class="primarybtn" onclick="searchGroupMemberClick()">查找</button>
             </div>
@@ -141,4 +141,5 @@
             </div>
         </div>
     </div>
+
 </div>
