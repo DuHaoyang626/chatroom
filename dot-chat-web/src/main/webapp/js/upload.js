@@ -139,7 +139,8 @@ function uploadAsync(url, file, model, successFn) {
             successFn(msgFileO);
         },
         error: function (err) {
-            console.error(err);
+            console.error("视频上传失败:", err);
+            myAlert("上传失败", "视频上传失败，请重试", "err");
         }
     });
 }

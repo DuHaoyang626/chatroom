@@ -17,14 +17,14 @@ import java.util.List;
 public interface ChatFriendDao extends BaseMapper<ChatFriend> {
 
 
-    @Select("select cu.nickname,cu.signature,cu.avatar, cu.sex, cf.remark, cf.friend_id, cf.is_top, cf.initial " +
+    @Select("select cu.nickname,cu.signature,cu.avatar, cu.sex, cu.is_online, cf.remark, cf.friend_id, cf.is_top, cf.initial " +
             "from chat_friend cf " +
             "inner join chat_user cu on cu.id=cf.friend_id " +
             "where cf.user_id=#{userId} ${andSql} " +
             "order by cf.is_top desc, cf.initial, cu.nickname ")
-    List<ChatUserFriendDto> selectChatUserFriendList(@Param("userId") Integer currentUserId, @Param("andSql") String andSql);
+    List<ChatUserFriendDto> selectChatUserFriendList(@Param("userId") Integer userId, @Param("andSql") String andSql);
 
-    @Select("select cu.nickname, cu.avatar, cu.sex,cu.signature, cf.friend_id,cf.remark,cf.label,cf.source " +
+    @Select("select cu.nickname, cu.avatar, cu.sex,cu.signature, cu.is_online, cf.friend_id,cf.remark,cf.label,cf.source " +
             "from chat_friend cf " +
             "inner join chat_user cu on cu.id=cf.friend_id " +
             "where cf.user_id=#{userId} and cf.friend_id=#{friendId}")

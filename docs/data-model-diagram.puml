@@ -1,0 +1,83 @@
+@startuml 聊天室数据模型类图
+
+package "数据实体" {
+    class 好友关系 {
+        + ID: Integer
+        + 用户ID: Integer
+        + 好友ID: Integer
+        + 备注: String
+        + 是否置顶: Boolean
+        + 标签: String
+        + 首字母: String
+        + 来源: String
+        + 创建时间: DateTime
+        + 更新时间: DateTime
+    }
+
+    class 好友申请 {
+        + ID: Integer
+        + 申请用户ID: Integer
+        + 好友ID: Integer
+        + 状态: Integer
+        + 来源: String
+        + 申请理由: String
+        + 申请回复: String
+        + 创建时间: DateTime
+        + 更新时间: DateTime
+    }
+
+    class 群组信息 {
+        + ID: Integer
+        + 群名称: String
+        + 群头像: String
+        + 成员数量: Integer
+        + 是否需要确认: Boolean
+        + 群主ID: Integer
+        + 管理员列表: String
+        + 备注: String
+        + 群公告: String
+        + 是否解散: Boolean
+        + 解散时间: DateTime
+        + 创建时间: DateTime
+        + 更新时间: DateTime
+    }
+
+    class 申请用户关联 {
+        + ID: Integer
+        + 申请ID: Integer
+        + 用户ID: Integer
+        + 好友ID: Integer
+        + 备注: String
+        + 标签: String
+        + 未读数: Integer
+        + 创建时间: DateTime
+        + 更新时间: DateTime
+    }
+}
+
+' 关系定义
+好友关系 "1" -- "1" 好友申请 : 关联
+好友申请 "1" -- "*" 申请用户关联 : 包含
+群组信息 "1" -- "*" 好友关系 : 成员
+
+note right of 好友关系
+  对应chat_friend表
+  包含好友关系的基本信息
+end note
+
+note right of 好友申请
+  对应chat_friend_apply表
+  处理好友申请流程
+end note
+
+note right of 群组信息
+  对应chat_group表
+  维护群组基本信息
+end note
+
+note right of 申请用户关联
+  对应chat_friend_apply_user_rel表
+  处理申请与用户的关联关系
+end note
+
+@enduml

@@ -47,6 +47,14 @@ let IMHandler = function () {
         }
 
         if (msgBody.msgType === MsgType.EVENT) {
+            // 新增：处理好友在线状态变更事件
+            if (msgBody.eventType === 'ONLINE_STATUS_CHANGE') {
+                // 重新拉取好友列表，刷新在线状态
+                if (typeof getFriendList === 'function') {
+                    getFriendList();
+                }
+                return;
+            }
             switchMsgEvent(msgBody);
         } else if (msgBody.chatType) {
             if (MsgType.AUDIO_CALL === msgBody.msgType || MsgType.VIDEO_CALL === msgBody.msgType) { // 语音或视频通话
@@ -491,4 +499,11 @@ function toFriendApplyInfo(friendApplyList, chatId) {
             $(applyInfoDom).click();
         }
     }
+}
+
+function uploadAndSendVideoFile(file) {
+    uploadVideoAsync(file, 'chat-msg', function (res) {
+        logger.info("上传成功,res:", res);
+        sendObjMsg(res, MsgType.VIDEO);
+    });
 }
