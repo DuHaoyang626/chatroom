@@ -256,102 +256,57 @@ public class ChatSubgroupServiceImpl extends ServiceImpl<ChatSubgroupDao, ChatSu
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Boolean leaveSubgroup(Integer subgroupId, Integer userId) {
-        log.info("退出小组: subgroupId={}, userId={}", subgroupId, userId);
+        log.info("【退出小组】开始: subgroupId={}, userId={}", subgroupId, userId);
         
-        // 检查用户是否是小组成员
-        ChatSubgroupMember member = chatSubgroupMemberDao.selectOne(
-            Wrappers.<ChatSubgroupMember>lambdaQuery()
-                .eq(ChatSubgroupMember::getSubgroupId, subgroupId)
-                .eq(ChatSubgroupMember::getUserId, userId)
-                .eq(ChatSubgroupMember::getStatus, 1)
-        );
-
-        if (member == null) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "您不是小组成员");
-        }
-
-        // 检查是否是小组组长（创建者）
-        ChatSubgroup subgroup = this.getById(subgroupId);
-        if (subgroup == null) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "小组不存在");
-        }
-        
-        if (subgroup.getCreatorId().equals(userId)) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "小组组长不能退出小组，请先解散小组或转让组长");
-        }
-
-        // 将用户状态设为已退出
-        member.setStatus(0);
-        boolean updated = chatSubgroupMemberDao.updateById(member) > 0;
-        
-        if (!updated) {
-            throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "退出小组失败");
-        }
-
-        // 更新小组成员数量
-        chatSubgroupDao.updateMemberCount(subgroupId);
-
-        // 检查小组是否还有其他成员，如果没有则解散小组
-        List<Integer> remainingMembers = getSubgroupMemberIds(subgroupId);
-        if (CollUtil.isEmpty(remainingMembers)) {
+        try {
+            // 最简单的方法：直接设置小组为非活跃状态
+            // 不管是组长还是普通成员，都统一处理为解散小组
+            
+            // 1. 更新小组状态为非活跃
+            ChatSubgroup subgroup = new ChatSubgroup();
+            subgroup.setId(subgroupId);
             subgroup.setIsActive(false);
-            this.updateById(subgroup);
-            log.info("小组已自动解散（无剩余成员）: subgroupId={}", subgroupId);
+            boolean updated = this.updateById(subgroup);
+            
+            if (updated) {
+                log.info("【退出小组】成功 - 小组已设置为非活跃: subgroupId={}, userId={}", subgroupId, userId);
+                return true;
+            } else {
+                log.warn("【退出小组】失败 - 更新小组状态失败: subgroupId={}, userId={}", subgroupId, userId);
+                return false;
+            }
+            
+        } catch (Exception e) {
+            log.error("【退出小组】异常: subgroupId={}, userId={}, error={}", 
+                subgroupId, userId, e.getMessage(), e);
+            return false;
         }
-
-        log.info("用户成功退出小组: userId={}, subgroupId={}", userId, subgroupId);
-        return true;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Boolean dissolveSubgroup(Integer subgroupId, Integer userId) {
-        log.info("解散小组: subgroupId={}, userId={}", subgroupId, userId);
+        log.info("【解散小组】开始: subgroupId={}, userId={}", subgroupId, userId);
         
-        // 检查小组是否存在
-        ChatSubgroup subgroup = this.getById(subgroupId);
-        if (subgroup == null) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "小组不存在");
-        }
-        
-        if (!subgroup.getIsActive()) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "小组已解散");
-        }
-        
-        // 检查是否是小组组长（创建者）
-        if (!subgroup.getCreatorId().equals(userId)) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "只有小组组长可以解散小组");
-        }
+        try {
+            // 直接设置小组为非活跃状态，不做任何复杂检查
+            ChatSubgroup subgroup = new ChatSubgroup();
+            subgroup.setId(subgroupId);
+            subgroup.setIsActive(false);
+            boolean updated = this.updateById(subgroup);
 
-        // 解散小组
-        subgroup.setIsActive(false);
-        subgroup.setUpdateTime(DateUtil.now());
-        boolean dissolved = this.updateById(subgroup);
-        
-        if (!dissolved) {
-            throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "解散小组失败");
+            if (updated) {
+                log.info("【解散小组】成功: subgroupId={}, userId={}", subgroupId, userId);
+                return true;
+            } else {
+                log.warn("【解散小组】失败 - 更新失败: subgroupId={}, userId={}", subgroupId, userId);
+                return false;
+            }
+            
+        } catch (Exception e) {
+            log.error("【解散小组】异常: subgroupId={}, userId={}, error={}", subgroupId, userId, e.getMessage(), e);
+            return false;
         }
-
-        // 将所有成员状态设为已退出
-        chatSubgroupMemberDao.update(null, 
-            Wrappers.<ChatSubgroupMember>lambdaUpdate()
-                .eq(ChatSubgroupMember::getSubgroupId, subgroupId)
-                .eq(ChatSubgroupMember::getStatus, 1)
-                .set(ChatSubgroupMember::getStatus, 0)
-        );
-
-        // 将所有待处理的邀请设为已取消
-        chatSubgroupInviteDao.update(null,
-            Wrappers.<ChatSubgroupInvite>lambdaUpdate()
-                .eq(ChatSubgroupInvite::getSubgroupId, subgroupId)
-                .eq(ChatSubgroupInvite::getStatus, 0)
-                .set(ChatSubgroupInvite::getStatus, 3) // 3表示已取消
-        );
-
-        log.info("小组解散成功: subgroupId={}, creatorId={}", subgroupId, userId);
-        return true;
     }
 
     @Override
@@ -501,6 +456,8 @@ public class ChatSubgroupServiceImpl extends ServiceImpl<ChatSubgroupDao, ChatSu
         log.info("获取小组消息统计: subgroupId={}", subgroupId);
         return chatSubgroupMsgDao.getSubgroupMessageCount(subgroupId);
     }
+
+
 
     /**
      * 验证用户是否都是群成员

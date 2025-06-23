@@ -24,7 +24,7 @@ public interface ChatGroupMemberDao extends BaseMapper<ChatGroupMember> {
      * @return 聊天室群组成员列表
      */
     @Select("select cgm.id,cgm.user_id,cgm.group_id,cgm.is_group_leader,cgm.is_group_manager,cgm.source,cgm.invite_user_id,cu.avatar,cu.is_online, " +
-            "if(length(cf.remark)>0,cf.remark,if(length(cgm.nickname)>1,cgm.nickname,cu.nickname)) as nickname,cgm.nickname as groupNickname,if(cf.id is null ,false,true) isFriend " +
+            "if(length(cf.remark)>0,cf.remark,if(length(cgm.nickname)>1,cgm.nickname,cu.phone)) as nickname,cgm.nickname as groupNickname,if(cf.id is null ,false,true) isFriend " +
             "from chat_group_member cgm " +
             "inner join chat_user cu on cgm.user_id=cu.id " +
             "left join chat_friend cf on cf.friend_id=cu.id and cf.user_id=#{userId} " +
