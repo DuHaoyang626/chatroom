@@ -4,6 +4,7 @@ import com.dot.comm.filter.LogMDCFilter;
 import com.dot.comm.interceptor.AccessLimitInterceptor;
 import com.dot.comm.interceptor.AdminAuthInterceptor;
 import com.dot.comm.interceptor.AdminTokenInterceptor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * token验证拦截器
  */
+@Slf4j
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
@@ -33,6 +35,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Bean
     public HandlerInterceptor accessLimitInterceptor() {
+        log.debug("🔧 [管理后台] 创建访问限制拦截器Bean");
         return new AccessLimitInterceptor();
     }
 
@@ -52,10 +55,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 添加token拦截器
-        // addPathPatterns添加需要拦截的命名空间；
-        // excludePathPatterns添加排除拦截命名空间
+        log.info("🔧 [管理后台] 配置拦截器开始");
+        
         // 限流限制拦截器
+        log.debug("📝 [管理后台] 添加访问限制拦截器，拦截路径: /**");
         registry.addInterceptor(accessLimitInterceptor())
                 .addPathPatterns("/**")
                 .excludePathPatterns(excludeStaticPathPatterns);
@@ -73,18 +76,35 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns(excludeApiPathPatterns2)
                 .excludePathPatterns(excludeApiPathPatterns);
 
-
+        log.info("✅ [管理后台] 拦截器配置完成");
     }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
+        log.info("🔧 [管理后台] 配置静态资源处理器开始");
+        
+        // 只处理静态资源，不拦截API请求
+        log.debug("📁 [管理后台] 添加静态资源映射: /static/** -> classpath:/static/");
+        registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
+        
+        log.debug("📁 [管理后台] 添加favicon映射: /favicon.ico -> classpath:/static/");
+        registry.addResourceHandler("/favicon.ico").addResourceLocations("classpath:/static/");
+        
+        log.debug("📁 [管理后台] 添加图标映射: /ico/** -> classpath:/static/ico/");
+        registry.addResourceHandler("/ico/**").addResourceLocations("classpath:/static/ico/");
+        
+        log.debug("📁 [管理后台] 添加API文档映射: doc.html -> classpath:/META-INF/resources/");
         registry.addResourceHandler("doc.html").addResourceLocations("classpath:/META-INF/resources/");
+        
+        log.debug("📁 [管理后台] 添加webjars映射: /webjars/** -> classpath:/META-INF/resources/webjars/");
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+        
+        log.info("✅ [管理后台] 静态资源处理器配置完成");
     }
 
     @Bean
     public FilterRegistrationBean<LogMDCFilter> logFilterRegistration() {
+        log.debug("🔧 [管理后台] 创建日志MDC过滤器Bean");
         FilterRegistrationBean<LogMDCFilter> registration = new FilterRegistrationBean<>();
         // 注入过滤器
         registration.setFilter(new LogMDCFilter());
@@ -94,6 +114,7 @@ public class WebConfig implements WebMvcConfigurer {
         registration.setName("logMDCFilter");
         // 过滤器顺序
         registration.setOrder(0);
+        log.debug("📝 [管理后台] 日志MDC过滤器配置: 拦截路径=/*，顺序=0");
         return registration;
     }
 }

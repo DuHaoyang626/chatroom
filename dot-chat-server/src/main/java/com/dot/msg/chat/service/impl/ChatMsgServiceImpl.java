@@ -30,6 +30,7 @@ import com.dot.msg.chat.request.ChatMsgSearchRequest;
 import com.dot.msg.chat.response.ChatUserMsgResponse;
 import com.dot.msg.chat.response.ChatUserResponse;
 import com.dot.msg.chat.service.*;
+import com.dot.msg.chat.service.ChatSubgroupService;
 import com.dot.msg.chat.tio.config.JRTioConfig;
 import com.dot.msg.chat.tio.em.CallTypeEm;
 import com.dot.msg.chat.tio.em.EventTypeEm;
@@ -44,6 +45,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.tio.core.ChannelContext;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,6 +82,10 @@ public class ChatMsgServiceImpl extends ServiceImpl<ChatMsgDao, ChatMsg> impleme
 
     @Resource
     private TransactionTemplate transactionTemplate;
+    
+    @Resource
+    @Lazy
+    private ChatSubgroupService chatSubgroupService;
 
     @Override
     public ChatMsg get(Integer msgId) {
@@ -332,17 +338,28 @@ public class ChatMsgServiceImpl extends ServiceImpl<ChatMsgDao, ChatMsg> impleme
     private List<ChatMsgUserRel> getNewChatMsgUserRelList(ChatMsgAddRequest request, ChatMsg chatMsg) {
         List<ChatMsgUserRel> chatMsgUserRelList = new ArrayList<>();
         List<Integer> userIdList = new ArrayList<>();
+        
         if (request.getChatType().equals(ChatTypeEm.SINGLE.name())) {
+            // 单聊消息
             userIdList.add(request.getSendUserId());
             if (!request.getSendUserId().equals(request.getToUserId())) {
                 userIdList.add(request.getToUserId());
             }
+        } else if (request.getChatType().equals("SUBGROUP")) {
+            // 小组聊天消息：获取小组成员列表
+            List<Integer> subgroupMemberIdList = chatSubgroupService.getSubgroupMemberIds(request.getGroupId());
+            if (CollUtil.isNotEmpty(subgroupMemberIdList)) {
+                userIdList.addAll(subgroupMemberIdList);
+                log.info("小组消息用户关系创建: subgroupId={}, memberCount={}", request.getGroupId(), subgroupMemberIdList.size());
+            }
         } else {
+            // 普通群聊消息
             List<Integer> groupMemberIdList = chatGroupMemberService.getChatGroupMemberIdListByGroupId(request.getGroupId());
             if (CollUtil.isNotEmpty(groupMemberIdList)) {
                 userIdList.addAll(groupMemberIdList);
             }
         }
+        
         if (CollUtil.isEmpty(userIdList)) {
             log.error("用户列表为空,request:{}", JSON.toJSONString(request));
             throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "用户列表为空");
@@ -352,6 +369,8 @@ public class ChatMsgServiceImpl extends ServiceImpl<ChatMsgDao, ChatMsg> impleme
             ChatMsgUserRel chatMsgUserRel = getNewChatMsgUserRel(userId, request, chatMsg.getId());
             chatMsgUserRelList.add(chatMsgUserRel);
         });
+        
+        log.info("创建消息用户关系: chatType={}, userCount={}", request.getChatType(), userIdList.size());
         return chatMsgUserRelList;
     }
 

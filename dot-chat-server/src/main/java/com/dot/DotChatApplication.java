@@ -5,7 +5,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
+@ComponentScan(basePackages = {"com.dot.msg", "com.dot.sys","com.dot.deepseek", "com.dot.comm.config", "com.dot.comm.manager", "com.dot.comm.exception"})
+@MapperScan(basePackages = {"com.dot.msg.*.dao", "com.dot.deepseek.dao"})
 @ComponentScan(basePackages = { "com.dot.msg", "com.dot.sys", "com.dot.deepseek", "com.dot.comm.config",
         "com.dot.comm.manager", "com.dot.comm.exception" })
 @MapperScan(basePackages = { "com.dot.msg.*.dao", "com.dot.deepseek.dao" })
