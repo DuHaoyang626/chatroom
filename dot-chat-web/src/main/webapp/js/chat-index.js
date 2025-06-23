@@ -4075,8 +4075,8 @@ function loadSubgroupMembers(subgroupId) {
  * 进入小组聊天
  */
 function enterSubgroupChat() {
+    // 只关闭我的小组对话框，不影响群管理界面
     $("#my-subgroup-dialog").hide();
-    $("#chat-msg-info").addClass("hide");
     
     // 显示小组聊天窗口
     showSubgroupChatWindow();
@@ -4087,6 +4087,13 @@ function enterSubgroupChat() {
  */
 function showSubgroupChatWindow() {
     $("#subgroup-chat-window").removeClass("hide");
+    
+    // 更新小组聊天窗口标题
+    if (window.currentSubgroupInfo) {
+        $("#subgroup-chat-name").text(window.currentSubgroupInfo.name);
+        // 获取成员数量
+        loadSubgroupMembers(window.currentSubgroupInfo.id);
+    }
     
     // 加载小组聊天消息
     loadSubgroupMessages();
@@ -4353,7 +4360,7 @@ function addSubgroupMessageToUI(message, type) {
     $("#subgroup-chat-messages").append(messageHtml);
     
     // 滚动到底部
-    let chatContent = $("#subgroup-chat-content")[0];
+    let chatContent = $(".subgroup-chat-content")[0];
     if (chatContent) {
         chatContent.scrollTop = chatContent.scrollHeight;
     }
@@ -4409,7 +4416,7 @@ function displaySubgroupMessages(messages) {
     $("#subgroup-chat-messages").html(messagesHtml);
     
     // 滚动到底部
-    let chatContent = $("#subgroup-chat-content")[0];
+    let chatContent = $(".subgroup-chat-content")[0];
     if (chatContent) {
         chatContent.scrollTop = chatContent.scrollHeight;
     }
@@ -4476,7 +4483,6 @@ function initSubgroupChat() {
  */
 function closeCreateSubgroupDialog() {
     $("#create-subgroup-dialog").hide();
-    $("#chat-msg-info").addClass("hide");
     
     // 清空输入内容
     $("#subgroup-name-input").val("");
@@ -4490,7 +4496,6 @@ function closeCreateSubgroupDialog() {
  */
 function closeMySubgroupDialog() {
     $("#my-subgroup-dialog").hide();
-    $("#chat-msg-info").addClass("hide");
 }
 
 /**
@@ -4498,7 +4503,6 @@ function closeMySubgroupDialog() {
  */
 function closeSubgroupInvitesDialog() {
     $("#subgroup-invites-dialog").hide();
-    $("#chat-msg-info").addClass("hide");
 }
 
 // 页面加载完成后初始化小组聊天功能
