@@ -7,7 +7,8 @@
     font-family: '微软雅黑', sans-serif;
 }
 
-html, body {
+html,
+body {
     width: 100%;
     height: 100%;
 }
@@ -88,12 +89,12 @@ html, body {
     border: 1px solid #cce5ff;
     text-indent: 30px;
     padding-right: 24px;
-    background-color: #d4e5fb;
+    background-color: #d5fbd4;
     font-size: 13px;
 }
 
 .main .top .top-left .search input::selection {
-    background-color: #84b6ff;
+    background-color: #a3ff84;
 }
 
 .main .top .top-left .search input:hover {
@@ -134,7 +135,8 @@ html, body {
     overflow-y: auto;
 }
 
-.top-search-dialog .search-friend-tit, .top-search-dialog .search-chat-room-tit {
+.top-search-dialog .search-friend-tit,
+.top-search-dialog .search-chat-room-tit {
     color: #9E9E9E;
     background-color: #f7f7f7;
     top: 0;
@@ -144,7 +146,8 @@ html, body {
     padding-top: 10px;
 }
 
-.top-search-dialog .search-friend-list, .top-search-dialog .search-chat-room-list {
+.top-search-dialog .search-friend-list,
+.top-search-dialog .search-chat-room-list {
     margin-left: 15px;
 }
 
@@ -313,7 +316,7 @@ html, body {
 }
 
 .main .top .top-type .friend {
-    background-image: url("../ico/friend_h.png");
+    background-image: url("../ico/friend_0.png");
 }
 
 .main .top .top-type .friend_select {
@@ -598,8 +601,7 @@ html, body {
 }
 
 /*视频播放样式*/
-.video-dialog {
-}
+.video-dialog {}
 
 .video-mask {
     z-index: 1001 !important;
@@ -797,7 +799,7 @@ html, body {
 .main .box .box-right .sendto .but-text .button {
     float: right;
     padding: 5px 25px;
-    background-color: #3bb4f2;
+    background-color: #2cc566;
     border: none;
     margin-right: 20px;
 }
@@ -884,7 +886,8 @@ html, body {
 }
 
 .emoji-box-bottom img {
-    margin: 1px 5px;;
+    margin: 1px 5px;
+    ;
     padding: 4px;
     width: 24px;
     height: 24px;
@@ -1236,8 +1239,7 @@ html, body {
     border-bottom: 1px solid #eaeaea;
 }
 
-.friend-apply .friend-apply-list .friend-right .friend-title {
-}
+.friend-apply .friend-apply-list .friend-right .friend-title {}
 
 .friend-apply .friend-apply-list .friend-right .friend-title .friend-name {
     font-weight: 400;
@@ -1303,7 +1305,8 @@ html, body {
 .addfriend .user-search .search-content input {
     color: #428dfc;
     line-height: 30px;
-    padding: 0 5px;;
+    padding: 0 5px;
+    ;
     border: 1px solid #b7b5b5;
     border-radius: 2px;
     width: 240px;
@@ -1474,7 +1477,8 @@ html, body {
 }
 
 .friend-container .friend-apply-info {
-    width: 440px;;
+    width: 440px;
+    ;
     height: 600px;
     margin-left: 100px;
 }
@@ -1640,7 +1644,7 @@ html, body {
 
 .friend-container .friend-apply-info .friend-bottom .send-msg-btn {
     font-size: 13px;
-    color: #0157ab;
+    color: #5bcd62;
     cursor: default;
     display: block;
     width: 42px;
@@ -1958,7 +1962,7 @@ html, body {
 .uset-info-tooltip .user-bottom .send-msg-btn {
     margin-top: 3px;
     font-size: 11px;
-    color: #0157ab;
+    color: #17c462;
     cursor: default;
     display: block;
     width: 45px;
@@ -2645,8 +2649,7 @@ html, body {
     float: left;
 }
 
-.search-msg-item-avatar {
-}
+.search-msg-item-avatar {}
 
 .search-msg-item-avatar .avatar-a {
     width: 45px;
@@ -2664,8 +2667,7 @@ html, body {
     border-bottom: 1px solid #e5e5e5;
 }
 
-.search-msg-item-nickname {
-}
+.search-msg-item-nickname {}
 
 .search-msg-item-nickname .nickname {
     width: 195px;
@@ -3070,7 +3072,8 @@ html, body {
     z-index: 1004;
 }
 
-.call-remote-video, .call-remote-audio {
+.call-remote-video,
+.call-remote-audio {
     position: absolute;
     top: 50%;
     left: 0;
@@ -3110,7 +3113,9 @@ html, body {
     font-size: 16px;
 }
 
-.call-local, .call-remote, .call-remote-accept {
+.call-local,
+.call-remote,
+.call-remote-accept {
     display: grid;
     place-items: center;
 }
@@ -3174,7 +3179,9 @@ html, body {
     color: rgba(255, 255, 255, 0.71);
 }
 
-.call-btn .call-hangup, .call-btn .call-cancel, .call-btn .call-refuse {
+.call-btn .call-hangup,
+.call-btn .call-cancel,
+.call-btn .call-refuse {
     background-color: #FF5151;
     background-image: url("../ico/call_hangup.png");
     background-size: 55%;
@@ -3190,14 +3197,19 @@ html, body {
     background-repeat: no-repeat;
 }
 
-.call-microphone-on, .call-camera-on, .call-microphone-off, .call-camera-off {
+.call-microphone-on,
+.call-camera-on,
+.call-microphone-off,
+.call-camera-off {
     background-color: #ffffff;
     background-size: 60%;
     background-position: center;
     background-repeat: no-repeat;
 }
 
-.call-microphone-off, .call-camera-off, .call-flip-camera {
+.call-microphone-off,
+.call-camera-off,
+.call-flip-camera {
     background-color: rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -3209,7 +3221,8 @@ html, body {
     background-image: url("../ico/call_microphone_off.png");
 }
 
-.call-camera-on, .call-camera-off {
+.call-camera-on,
+.call-camera-off {
     background-image: url("../ico/call_camera_on.png");
 }
 
@@ -3226,7 +3239,8 @@ html, body {
 
 .msg-call-wrap {
     display: flex;
-    align-items: center; /* 垂直居中 */
+    align-items: center;
+    /* 垂直居中 */
 }
 
 .call-msg-text {
@@ -3283,7 +3297,8 @@ html, body {
 
 .ai-msg-dialog .ai-content {
     display: grid;
-    place-items: center; /* 水平和垂直居中 */
+    place-items: center;
+    /* 水平和垂直居中 */
     height: 60px;
     white-space: pre-wrap;
     word-wrap: break-word;
@@ -3302,9 +3317,7 @@ html, body {
     height: 95px;
 }
 
-.ai-msg-dialog .ai-content .ai-output {
-
-}
+.ai-msg-dialog .ai-content .ai-output {}
 
 .ai-msg-dialog .ai-msg-btns {
     float: right;
@@ -3424,19 +3437,27 @@ html, body {
     margin-left: 4px;
     vertical-align: middle;
 }
-.online-dot.online { background: #4caf50; }
-.online-dot.offline { background: #bdbdbd; }
+
+.online-dot.online {
+    background: #4caf50;
+}
+
+.online-dot.offline {
+    background: #bdbdbd;
+}
 
 .friend-info {
     display: flex;
     align-items: center;
     padding: 8px 0;
 }
+
 .friend-info.select {
     display: flex;
     align-items: center;
     background-color: #d2d2d2 !important;
 }
+
 .friend-head {
     width: 40px;
     flex-shrink: 0;
@@ -3444,20 +3465,26 @@ html, body {
     align-items: center;
     justify-content: center;
 }
+
 .friend-avatar {
     width: 36px;
     height: 36px;
     border-radius: 50%;
     display: block;
 }
+
 .friend-right {
     margin-left: 10px;
     flex: 1;
-    min-width: 0; /* 允许flex子项溢出时省略号而不是换行 */
+    min-width: 0;
+    /* 允许flex子项溢出时省略号而不是换行 */
 }
+
 .friend-title {
-    min-width: 0; /* 防止嵌套flex导致溢出换行 */
+    min-width: 0;
+    /* 防止嵌套flex导致溢出换行 */
 }
+
 .friend-name {
     font-weight: 400;
     font-size: 13px;
