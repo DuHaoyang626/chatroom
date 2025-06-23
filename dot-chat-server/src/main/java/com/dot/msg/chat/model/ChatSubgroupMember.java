@@ -62,4 +62,17 @@ public class ChatSubgroupMember implements Serializable {
      */
     @Schema(description = "状态(1:正常,0:已退出)")
     private Integer status;
+
+    // 以下字段不存储到数据库，仅用于查询结果返回
+    /**
+     * 用户昵称（查询时关联获取）
+     */
+    @Schema(description = "用户昵称")
+    private String nickname;
+
+    /**
+     * 用户头像（查询时关联获取）
+     */
+    @Schema(description = "用户头像")
+    private String avatar;
 } 

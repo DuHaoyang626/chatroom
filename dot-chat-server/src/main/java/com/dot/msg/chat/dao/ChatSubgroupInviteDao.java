@@ -20,8 +20,11 @@ public interface ChatSubgroupInviteDao extends BaseMapper<ChatSubgroupInvite> {
     /**
      * 获取用户收到的小组邀请
      */
-    @Select("SELECT si.*, sg.name as subgroup_name FROM chat_subgroup_invite si " +
+    @Select("SELECT si.*, sg.name as subgroup_name, " +
+            "inviter.nickname as inviter_nickname, inviter.avatar as inviter_avatar " +
+            "FROM chat_subgroup_invite si " +
             "INNER JOIN chat_subgroup sg ON si.subgroup_id = sg.id " +
+            "LEFT JOIN chat_user inviter ON si.inviter_id = inviter.id " +
             "WHERE si.invitee_id = #{userId} AND si.status = 0 AND sg.is_active = 1")
     List<ChatSubgroupInvite> getUserPendingInvites(@Param("userId") Integer userId);
 

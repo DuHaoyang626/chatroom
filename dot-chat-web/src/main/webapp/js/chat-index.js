@@ -4217,9 +4217,9 @@ function showSubgroupInvites(invites) {
             <li class="subgroup-invite-item">
                 <div class="invite-header">
                     <span class="invite-subgroup-name">${invite.subgroupName}</span>
-                    <span class="invite-time">${invite.createTime}</span>
+                    <span class="invite-time">${invite.inviteTime}</span>
                 </div>
-                <div class="invite-from">邀请人：${invite.inviterName}</div>
+                <div class="invite-from">邀请人：${invite.inviterNickname || '未知用户'}</div>
                 <div class="invite-actions">
                     <button class="invite-accept-btn" onclick="acceptSubgroupInvite(${invite.id})">接受</button>
                     <button class="invite-reject-btn" onclick="rejectSubgroupInvite(${invite.id})">拒绝</button>
@@ -4398,7 +4398,7 @@ function displaySubgroupMessages(messages) {
             
             messagesHtml += `
                 <li class="${type}">
-                    ${!isOwn ? `<div class="subgroup-msg-sender">${msg.senderName || '未知用户'}</div>` : ''}
+                    ${!isOwn ? `<div class="subgroup-msg-sender">${msg.senderNickname || '未知用户'}</div>` : ''}
                     <div class="subgroup-msg-content">${msg.msg}</div>
                     <div class="subgroup-msg-time">${msg.sendTime}</div>
                 </li>

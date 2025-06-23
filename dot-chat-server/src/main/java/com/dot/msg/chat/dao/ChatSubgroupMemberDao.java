@@ -20,7 +20,10 @@ public interface ChatSubgroupMemberDao extends BaseMapper<ChatSubgroupMember> {
     /**
      * 获取小组所有成员
      */
-    @Select("SELECT * FROM chat_subgroup_member WHERE subgroup_id = #{subgroupId} AND status = 1")
+    @Select("SELECT sm.*, u.nickname, u.avatar " +
+            "FROM chat_subgroup_member sm " +
+            "LEFT JOIN chat_user u ON sm.user_id = u.id " +
+            "WHERE sm.subgroup_id = #{subgroupId} AND sm.status = 1")
     List<ChatSubgroupMember> getSubgroupMembers(@Param("subgroupId") Integer subgroupId);
 
     /**

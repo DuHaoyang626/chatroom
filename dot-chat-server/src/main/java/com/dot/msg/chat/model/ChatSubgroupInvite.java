@@ -74,4 +74,23 @@ public class ChatSubgroupInvite implements Serializable {
      */
     @Schema(description = "处理时间")
     private String handleTime;
+
+    // 以下字段不存储到数据库，仅用于查询结果返回
+    /**
+     * 小组名称（查询时关联获取）
+     */
+    @Schema(description = "小组名称")
+    private String subgroupName;
+
+    /**
+     * 邀请人昵称（查询时关联获取）
+     */
+    @Schema(description = "邀请人昵称")
+    private String inviterNickname;
+
+    /**
+     * 邀请人头像（查询时关联获取）
+     */
+    @Schema(description = "邀请人头像")
+    private String inviterAvatar;
 } 

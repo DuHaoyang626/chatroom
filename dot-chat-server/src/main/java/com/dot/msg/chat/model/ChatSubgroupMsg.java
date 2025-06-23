@@ -74,4 +74,17 @@ public class ChatSubgroupMsg implements Serializable {
      */
     @Schema(description = "时间戳")
     private Long timestamp;
+
+    // 以下字段不存储到数据库，仅用于查询结果返回
+    /**
+     * 发送者昵称（查询时关联获取）
+     */
+    @Schema(description = "发送者昵称")
+    private String senderNickname;
+
+    /**
+     * 发送者头像（查询时关联获取）
+     */
+    @Schema(description = "发送者头像")
+    private String senderAvatar;
 } 
