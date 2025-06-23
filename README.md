@@ -1,616 +1,187 @@
-# 星星点点聊天室（Dot Chat）
+# 星星点点聊天室项目
 
-## 🎯 项目全面分析
+## 项目简介
+基于Java Spring Boot + WebSocket的即时通讯系统，支持单聊、群聊、小组聊天等功能。
 
-### 📊 项目概况
-这是一个**企业级即时通讯系统**，专为现代团队协作和沟通而设计。项目基于**Spring Boot**后端框架和**WebSocket**实时通信技术，提供了完整的聊天室解决方案，包括单聊、群聊、音视频通话、AI智能助手等功能。
+## 项目架构
+- **dot-chat-server**: 聊天服务器 (端口8089, WebSocket端口9326)
+- **dot-chat-admin**: 管理后台 (端口9089)
+- **dot-chat-web**: 前端用户界面
+- **nginx**: 反向代理服务器 (端口80)
+- **common-util**: 公共工具类
 
-### 🏗️ 技术架构详解
+## 快速启动
 
-#### 后端架构（Java）
-- **主框架**: Spring Boot 3.3.5 + MyBatis Plus
-- **实时通信**: T-io WebSocket框架（高性能Socket框架）
-- **数据存储**: MySQL 8.3.0 + Redis缓存
-- **消息队列**: 基于WebSocket的消息推送机制
-- **AI集成**: DeepSeek AI智能对话引擎
-- **文件存储**: 阿里云OSS云存储
-- **安全认证**: JWT Token + Redis会话管理
+### 1. 数据库准备
+- MySQL (端口3306)
+- Redis (端口6379)
 
-#### 前端架构（Web）
-- **基础框架**: jQuery + Bootstrap响应式设计
-- **实时通信**: WebSocket客户端 + Server-Sent Events
-- **音视频**: WebRTC点对点通信
-- **UI组件**: Layer弹层 + 自定义组件库
-- **移动端**: 适配移动端的响应式设计
-
-#### 模块划分
-```
-├── common-util/           # 🔧 通用工具库
-├── dot-chat-server/       # 🚀 核心服务器模块
-├── dot-chat-admin/        # 👨‍💼 管理后台模块  
-├── dot-chat-web/          # 🌐 前端Web应用
-└── design/               # 📋 设计文档与原型
-```
-
-### 💡 核心功能模块
-
-#### 1. 用户管理系统
-- ✅ **用户注册/登录**: 多种登录方式（手机/邮箱/用户名）
-- ✅ **用户权限**: 基于角色的权限控制系统
-- ✅ **个人资料**: 头像上传、个人信息管理
-- ✅ **好友系统**: 添加好友、好友列表管理
-
-#### 2. 基础聊天功能
-- ✅ **单聊**: 一对一私人聊天
-- ✅ **群聊**: 支持最多500人的大群聊天
-- ✅ **多媒体消息**: 文字、图片、文件、语音、视频
-- ✅ **消息状态**: 发送状态、已读回执
-- ✅ **消息历史**: 聊天记录的持久化存储和查询
-- ✅ **在线状态**: 实时显示用户在线状态
-
-#### 3. 🔥 **群内小组聊天功能（最新修复完成）**
-这是项目的**核心创新功能**，完全符合老师要求：
-
-##### ✅ **功能特性**
-- **动态子群**: 群内成员可以创建临时小组进行独立讨论
-- **消息隔离**: 小组内聊天，非成员收不到消息通知
-- **互斥约束**: 一个用户在同一群里只能参与一个小组
-- **多邀请机制**: 可以收到多个小组邀请，但只能接受一个
-- **智能权限**: 只有原群成员才能被邀请到小组
-
-##### ✅ **后端实现状态（100%完成）**
-- **数据库设计**: ✅ 4个核心表结构完整
-  - `chat_subgroup` - 小组基本信息
-  - `chat_subgroup_member` - 成员关系
-  - `chat_subgroup_invite` - 邀请记录
-  - `chat_subgroup_msg` - **消息记录（已修复）**
-
-- **数据访问层**: ✅ 完整的DAO接口
-  - 所有CRUD操作
-  - 复杂查询逻辑
-  - **消息保存和查询（新增）**
-
-- **业务逻辑层**: ✅ 完整的Service实现
-  - 小组创建、邀请、加入、退出
-  - 权限验证、状态管理
-  - **消息发送和保存（已修复）**
-  - **消息历史查询（新增）**
-  - **消息搜索功能（新增）**
-
-- **接口层**: ✅ 完整的REST API
-  - 15个核心API接口
-  - **新增4个消息相关API**：
-    - `/api/msg/chat/subgroup/messages` - 获取消息列表
-    - `/api/msg/chat/subgroup/messages/history` - 消息分页查询
-    - `/api/msg/chat/subgroup/messages/search` - 消息搜索
-    - `/api/msg/chat/subgroup/messages/count` - 消息统计
-
-##### 🔧 **最新修复内容**
-1. **创建ChatSubgroupMsgDao.java**: 新增消息数据访问接口
-2. **修复消息保存逻辑**: 在sendSubgroupMessage方法中正确保存消息到数据库
-3. **新增消息查询功能**: 支持消息列表、历史记录、搜索等操作
-4. **完善事务管理**: 确保消息保存的数据一致性
-5. **新增API接口**: 4个消息相关的REST API接口
-
-##### ❌ **待实现部分**
-- **前端界面**: 小组功能的前端UI界面（这是下一步重点）
-- **实时推送**: WebSocket消息推送到小组成员
-- **消息通知**: 小组消息的桌面和声音提醒
-
-#### 4. 音视频通话
-- ✅ **语音通话**: WebRTC点对点语音通话
-- ✅ **视频通话**: 高清视频通话支持
-- ✅ **屏幕共享**: 会议中的屏幕分享功能
-- ✅ **通话记录**: 通话历史记录管理
-
-#### 5. AI智能助手
-- ✅ **DeepSeek集成**: 接入DeepSeek AI模型
-- ✅ **智能对话**: 支持上下文理解的AI对话
-- ✅ **多模态支持**: 文本、图片等多种输入方式
-- ✅ **实时响应**: Server-Sent Events实现流式响应
-
-#### 6. 文件管理
-- ✅ **文件上传**: 支持各种格式文件上传
-- ✅ **图片处理**: 自动压缩、缩略图生成
-- ✅ **云存储**: 阿里云OSS集成
-- ✅ **文件预览**: 在线预览常见文件格式
-
-#### 7. 管理后台
-- ✅ **用户管理**: 用户列表、权限分配
-- ✅ **消息监控**: 聊天消息的监控和管理
-- ✅ **系统统计**: 各种业务数据统计分析
-- ✅ **配置管理**: 系统参数配置
-
-### 🚀 部署和运行
-
-#### 环境要求
-- **Java**: JDK 17+
-- **数据库**: MySQL 8.0+
-- **缓存**: Redis 6.0+
-- **Nginx**: 用于前端静态资源服务
-
-#### 快速启动
-1. **数据库初始化**
-   ```sql
-   -- 导入基础表结构
-   source dot-chat-server/sql/聊天室MySQL表结构.sql;
-   -- 导入小组功能表结构
-   source dot-chat-server/sql/群内小组功能.sql;
-   ```
-
-2. **配置文件**
-   - 修改 `application-dev.yml` 中的数据库连接信息
-   - 配置Redis连接参数
-   - 设置文件上传路径
-
-3. **启动服务**
-   ```bash
-   # 启动聊天服务
-   cd dot-chat-server && ./bin/dev/start.sh
-   
-   # 启动管理后台
-   cd dot-chat-admin && ./bin/dev/start.sh
-   ```
-
-4. **访问系统**
-   - 聊天室：http://localhost:8092
-   - 管理后台：http://localhost:8093
-
-### 📝 开发进度
-
-#### ✅ 已完成功能
-- 用户系统（注册、登录、权限）
-- 单聊、群聊基础功能
-- **小组聊天后端完整实现**
-- 音视频通话
-- AI智能助手
-- 文件上传下载
-- 管理后台
-
-#### 🔄 正在开发
-- **小组聊天前端界面**
-- WebSocket实时消息推送优化
-- 移动端适配增强
-
-#### 📋 待开发功能
-- 消息加密传输
-- 多语言国际化
-- 插件系统
-- 开放API接口
-
-### 🛠️ 技术亮点
-
-1. **高性能架构**: T-io框架支持百万并发连接
-2. **实时通信**: WebSocket + SSE双重保障
-3. **AI集成**: 无缝集成AI助手功能
-4. **响应式设计**: PC和移动端完美适配
-5. **模块化设计**: 清晰的模块划分，便于维护扩展
-6. **安全可靠**: 完整的权限控制和数据保护机制
-
-### 📞 技术支持
-
-如需技术支持或有任何问题，请参考：
-- 项目启动指南：`startup-guide.md`
-- API文档：服务启动后访问 `/swagger-ui/index.html`
-- 设计文档：`design/` 目录下的相关文档
-
----
-
-**🎉 小组聊天功能后端实现已100%完成，消息保存功能已修复，可正常运行！下一步重点：前端界面开发**
-
-## 📋 项目简介
-这是一个基于Java+Spring Boot开发的现代化即时通讯系统，支持实时聊天、音视频通话、AI智能助手等功能。项目采用前后端分离架构，具有良好的扩展性和稳定性。
-
-## ✨ 功能特性
-
-### 🔥 新增功能：群内小组聊天（分屏版本）
-- **分屏聊天界面**：左侧主群聊天，右侧小组聊天，支持同时进行
-- **小组创建**：群成员可以创建小组并邀请部分群成员
-- **消息隔离**：小组内聊天，非小组成员无法收到消息
-- **互斥约束**：用户同时只能参与一个小组，保证聊天焦点
-- **智能邀请**：支持多个邀请，但只能接受一个
-- **响应式设计**：桌面端分屏显示，移动端上下布局
-- **实时通知**：邀请、加入、退出的即时推送
-
-### 💬 核心聊天功能
-- **单聊**：一对一私人聊天
-- **群聊**：多人群组聊天
-- **消息类型**：支持文字、图片、文件、表情等
-- **消息状态**：已读/未读状态显示
-- **历史记录**：完整的聊天记录保存
-
-### 📞 音视频通话
-- **语音通话**：高质量音频通话
-- **视频通话**：1080P高清视频通话
-- **屏幕共享**：桌面分享功能
-- **群组通话**：支持多人音视频会议
-
-### 🤖 AI智能助手
-- **AI聊天**：集成DeepSeek AI智能对话
-- **智能回复**：AI自动生成回复建议
-- **语言翻译**：多语言实时翻译
-- **内容总结**：长文本智能摘要
-
-### 👥 用户管理
-- **好友系统**：添加、删除、分组管理好友
-- **用户资料**：头像、昵称、状态设置
-- **在线状态**：实时在线/离线状态显示
-- **黑名单**：屏蔽不良用户
-
-### 📁 文件传输
-- **文件上传**：支持多种文件格式
-- **图片预览**：图片自动压缩和预览
-- **断点续传**：大文件断点续传
-- **云存储**：阿里云OSS文件存储
-
-## 🏗️ 技术栈
-
-### 后端技术
-- **Spring Boot 3.3.5** - 主框架
-- **MyBatis Plus 3.5.7** - 数据持久化
-- **MySQL 8.3.0** - 数据库
-- **T-io WebSocket 3.8.6** - 实时通信框架
-- **Redis** - 缓存和会话管理
-- **Alibaba Druid** - 数据库连接池
-
-### 前端技术
-- **jQuery** - JavaScript框架
-- **WebSocket** - 实时通信
-- **WebRTC** - 音视频通话
-- **Bootstrap** - UI框架
-- **Layer** - 弹层组件
-
-### 第三方集成
-- **阿里云OSS** - 文件存储
-- **DeepSeek AI** - AI聊天助手
-- **二维码生成** - 扫码功能
-
-## 🚀 快速启动指南
-
-## ⚡ 一键启动步骤
-
-### 1. 启动前端服务器 (nginx)
+### 2. 启动后端服务
 ```bash
-# 进入nginx目录
+# 启动聊天服务器
+cd dot-chat-server
+java -jar target/dot-chat-server.jar
+
+# 启动管理后台
+cd dot-chat-admin  
+java -jar target/dot-chat-admin.jar
+```
+
+### 3. 启动nginx
+```bash
 cd nginx-1.28.0
-
-# 启动nginx (Windows)
-start nginx.exe
-
-# 或者直接双击 nginx.exe 文件
+./nginx.exe
 ```
 
-### 2. 启动后端服务器
+### 4. 访问地址
+- 用户聊天界面: http://localhost/
+- 管理后台: http://localhost/admin/
+
+## 常见问题解决
+
+### Bean创建循环依赖错误
+
+**问题现象**: 启动时出现`BeanCreationException`错误，提示`Error creating bean with name 'chatFriendApplyController': Injection of resource dependencies failed`
+
+**错误信息示例**:
+```
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'chatFriendApplyServiceImpl': Injection of resource dependencies failed
+...
+Relying upon circular references is discouraged and they are prohibited by default. Update your application to remove the dependency cycle between beans.
+```
+
+**问题原因**: Spring Boot 2.6+版本默认禁止循环引用，而项目中的Service层存在循环依赖
+
+**解决方案**:
+1. **配置允许循环引用** - 在`application.yml`中添加：
+```yaml
+spring:
+  main:
+    allow-circular-references: true
+```
+
+2. **添加TransactionTemplate Bean配置** - 在`CommBeanConfig.java`中添加：
+```java
+@Bean
+public TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
+    return new TransactionTemplate(transactionManager);
+}
+```
+
+3. **使用@Lazy注解解决循环依赖** - 在有循环依赖的地方使用：
+```java
+@Resource
+@Lazy
+private ChatSubgroupService chatSubgroupService;
+```
+
+### 登录502错误问题
+
+**问题现象**: 点击登录按钮后无响应，浏览器控制台出现502 (Bad Gateway)错误
+
+**问题原因**: Spring Boot静态资源处理器配置错误，使用`/**`匹配所有路径导致API请求被错误处理
+
+**解决方案**: 
+1. 修改`dot-chat-server/src/main/java/com/dot/comm/config/WebConfig.java`
+2. 修改`dot-chat-admin/src/main/java/com/dot/comm/config/WebConfig.java`
+
+将以下配置：
+```java
+@Override
+public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
+    // ...
+}
+```
+
+修改为：
+```java
+@Override
+public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    // 只处理静态资源，不拦截API请求
+    registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
+    registry.addResourceHandler("/favicon.ico").addResourceLocations("classpath:/static/");
+    registry.addResourceHandler("/ico/**").addResourceLocations("classpath:/static/ico/");
+    registry.addResourceHandler("doc.html").addResourceLocations("classpath:/META-INF/resources/");
+    registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+}
+```
+
+**修复后需要**:
+1. 重新编译并启动两个后端服务
+2. 确认端口监听状态：
+   - 8089端口：聊天服务器
+   - 9089端口：管理后台
+   - 9326端口：WebSocket服务
+
+### 登录API地址配置问题
+
+**问题现象**: 前端登录时出现502错误，API请求失败
+
+**问题原因**: 前端JavaScript中的API地址配置与实际服务端口不匹配
+
+**解决方案**: 
+通过Nginx反向代理实现 `http://localhost` 访问：
+
+1. **恢复前端配置** - 将 `dot-chat-web/src/main/webapp/js/base.js` 中的HOST改回：
+```javascript
+HOST = "localhost";  // 不带端口号
+BASE_URL = "http://" + HOST + "/";
+```
+
+2. **启动Nginx** - 使用已配置好的nginx.conf：
 ```bash
-# 进入后端目录
+cd nginx-1.28.0
+.\nginx.exe
+```
+
+3. **启动后端服务**：
+```bash
+# 聊天服务器 (端口8089)
 cd dot-chat-server
+mvn spring-boot:run
 
-# 编译项目
-mvn clean install -DskipTests
-
-# 启动后端服务
-java -jar target/dot-chat.jar --spring.profiles.active=dev
+# 管理后台 (端口9089) - 可选
+cd dot-chat-admin  
+mvn spring-boot:run
 ```
 
-### 3. 访问应用
-- **聊天室主页**: http://localhost
-- **API文档**: http://localhost:8089/doc.html (需要后端启动)
-- **管理后台**: http://localhost:8082 (需要单独启动管理后台)
+**Nginx代理配置说明**:
+- `http://localhost/` → 用户聊天界面
+- `http://localhost/admin/` → 管理后台界面  
+- `http://localhost/api/sys/` → 管理后台API (代理到9089端口)
+- `http://localhost/api/` → 聊天API (代理到8089端口)
+- WebSocket连接代理到9326端口
 
-## 🔧 服务状态检查
-
-启动后可以通过以下命令检查服务状态：
-
+### 端口检查命令
 ```bash
-# 检查nginx进程
-tasklist | findstr "nginx"
-
-# 检查端口监听状态
-netstat -an | findstr "LISTENING" | findstr ":80\|:8089\|:9326"
+# Windows PowerShell
+netstat -an | Select-String "LISTENING" | Select-String ":80|:8089|:9326"
 
 # 检查Java进程
-tasklist | findstr "java"
+Get-Process -Name "java" -ErrorAction SilentlyContinue
 ```
 
-## ⚠️ 重要说明
-
-1. **前端服务 (nginx)**: 监听80端口，提供静态文件服务
-2. **后端API服务**: 监听8089端口，提供接口服务
-3. **WebSocket服务**: 监听9326端口，提供实时通信
-4. **数据库要求**: 需要MySQL和Redis服务 (开发环境可以使用模拟数据)
-
-## 🎯 功能体验
-
-即使没有完整的数据库环境，你也可以：
-- 访问前端界面
-- 体验聊天界面布局
-- 查看功能演示
-
-完整功能需要配置：
-- MySQL 8.0+ 数据库
-- Redis 6.0+ 缓存服务
-
-## 📱 使用说明
-
-### 群内小组聊天功能使用
-
-1. **创建小组**
-   - 在群聊界面点击"小组聊天"按钮
-   - 选择"创建小组"Tab
-   - 输入小组名称，选择要邀请的成员
-   - 点击"创建小组"完成创建
-
-2. **处理邀请**
-   - 收到小组邀请时，按钮会显示红色数字提醒
-   - 点击"小组聊天"按钮，选择"邀请处理"Tab
-   - 选择"接受"或"拒绝"邀请
-
-3. **分屏小组聊天**
-   - 加入小组后，在"当前小组"Tab可以看到小组信息
-   - 点击"🗨️ 打开分屏聊天"按钮开启分屏模式
-   - 左侧显示主群聊天，右侧显示小组聊天
-   - 可以同时参与群聊和小组聊天
-   - 右侧小组窗口支持最小化和关闭操作
-
-4. **退出小组**
-   - 在"当前小组"Tab点击"退出小组"
-   - 确认后即可退出当前小组
-
-### 约束说明
-- ⚠️ **重要**：每个用户在同一个群中只能同时参与一个小组
-- 可以收到多个小组邀请，但只能接受一个
-- 退出小组后可以接受新的邀请或创建新小组
-- 创建小组时不会显示自己的账户选项（创建者自动成为小组成员）
-
-## 🏗️ 项目结构
-
-```
-chatroom/
-├── dot-chat-server/          # 后端服务器
-│   ├── src/main/java/
-│   │   └── com/dot/msg/chat/
-│   │       ├── controller/   # 控制器层
-│   │       ├── service/      # 服务层
-│   │       ├── dao/          # 数据访问层
-│   │       ├── model/        # 实体类
-│   │       └── tio/          # WebSocket处理
-│   └── sql/                  # 数据库脚本
-├── dot-chat-web/             # 前端Web应用
-│   └── src/main/webapp/
-│       ├── js/               # JavaScript文件
-│       ├── css/              # 样式文件
-│       └── pages/            # 页面文件
-├── dot-chat-admin/           # 管理后台
-├── common-util/              # 公共工具库
-└── README.md
-```
-
-## 🔧 开发指南
-
-### 新功能开发流程
-1. 创建数据库表结构
-2. 创建实体类和DAO接口
-3. 实现Service业务逻辑
-4. 创建Controller API接口
-5. 开发前端页面和JavaScript
-6. 编写单元测试
-7. 更新文档
-
-### 代码规范
-- 遵循阿里巴巴Java开发手册
-- 使用统一的注释模板
-- 所有public方法必须有完整注释
-- 重要业务逻辑必须有日志记录
-
-## 🐛 问题排查
-
-### 常见问题
-1. **无法连接数据库**
-   - 检查MySQL服务是否启动
-   - 确认数据库连接配置正确
-   - 检查防火墙设置
-
-2. **WebSocket连接失败**
-   - 检查端口是否被占用
-   - 确认T-io配置正确
-   - 查看浏览器控制台错误信息
-
-3. **小组功能异常**
-   - 确认已执行小组功能SQL脚本
-   - 检查数据库约束是否正确创建
-   - 查看后端日志错误信息
-
-## 🤝 贡献指南
-
-欢迎提交Issue和Pull Request！
-
-### 贡献步骤
-1. Fork本项目
-2. 创建功能分支：`git checkout -b feature/your-feature`
-3. 提交更改：`git commit -am 'Add some feature'`
-4. 推送分支：`git push origin feature/your-feature`
-5. 提交Pull Request
-
-## 📄 更新日志
-
-### v2.1.0 - 2024-12-21
-- 🎉 **小组聊天前端完整集成**：完成小组聊天功能的前端界面开发
-  - ✅ 在群聊右上角"..."菜单中新增"小组聊天"选项
-  - ✅ 创建完整的小组管理界面，包括创建、加入、管理功能
-  - ✅ 实现小组聊天浮窗，支持拖拽、最小化、关闭操作
-  - ✅ 添加小组邀请管理界面，支持查看、接受、拒绝邀请
-  - ✅ 实现"我的小组"管理功能，查看小组信息和成员
-  - ✅ 完善退出小组功能，带确认提示和安全机制
-- 💫 **用户体验优化**：
-  - Material Design风格的现代化UI设计
-  - 响应式布局，完美适配桌面和移动端
-  - 实时消息计数和状态同步
-  - 智能的成员搜索和选择功能
-- 🔧 **技术特色**：
-  - 基于jQuery和CSS3的流畅动画效果
-  - 完整的事件处理和状态管理
-  - 优雅的错误处理和用户提示
-  - 符合现有项目架构和代码规范
-
-### v2.0.1 - 2024-12-20
-- 🐛 **重要修复**：修复nginx代理配置导致的登录问题
-  - 问题：nginx将`/api/sys/user/login`错误代理为`/sys/user/login`
-  - 解决：修正nginx配置，确保API路径完整传递
-- ✨ **功能优化**：创建小组时过滤当前用户
-  - 创建小组的成员选择列表中不再显示自己的账户
-  - 创建者会自动成为小组成员，无需手动选择
-- 🔧 **技术改进**：完善WebSocket连接机制
-  - 优化Token验证重试逻辑
-  - 修复双端口URL配置错误
-- 🐛 **小组功能修复**：解决小组管理界面错误
-  - 修复`layer.msg`未定义错误，替换为项目使用的`myAlert`函数
-  - 修复`loadSubgroupMembers`函数未定义问题
-  - 修复`modal`函数调用错误，使用自定义模态框替代Bootstrap
-  - 添加小组成员查看功能和完整的错误处理
-
-### v2.0.0 - 2024-12-XX
-- ✨ 新增群内小组聊天功能
-- 🔒 实现用户小组互斥约束
-- 📱 优化前端交互体验
-- 🐛 修复已知问题
-
-### v1.0.0 - 2024-01-XX
-- 🎉 项目初始版本
-- 💬 基础聊天功能
-- 📞 音视频通话功能
-- 🤖 AI智能助手集成
-
-## 📝 许可证
-
-本项目采用 [MIT许可证](LICENSE)
-
-## 👨‍💻 开发者
-
-- **原作者**：@du-hao-yang
-- **功能扩展**：吴安然 (群内小组功能)
-
-## 🙏 致谢
-
-感谢所有为这个项目贡献代码和建议的开发者！
-## 🚨 常见问题解决
-
-### ❗ 登录点击没有反应
-
-如果您遇到点击登录按钮没有反应的问题，请按以下步骤排查：
-
-#### 🔍 快速诊断
-访问诊断页面：**http://localhost/login-test.html**
-
-这个专门的诊断工具会自动检测：
-- ✅ 前端服务状态 (nginx)
-- 🔗 后端API连接 (8089端口)
-- 🌐 WebSocket服务 (9326端口)
-- 🔑 登录接口测试
-
-#### 🛠️ 手动解决步骤
-
-**步骤1: 检查服务状态**
-```bash
-# 检查端口监听
-netstat -an | findstr "LISTENING" | findstr ":80\|:8089\|:9326"
-
-# 检查Java进程
-tasklist | findstr "java"
-```
-
-**步骤2: 重启服务（推荐）**
-```bash
-# 1. 停止所有Java进程
-taskkill /f /im java.exe
-
-# 2. 重新启动后端服务
-cd dot-chat-server
-java -jar target/dot-chat.jar --spring.profiles.active=dev
-
-# 3. 确认启动成功（看到以下信息）
-# "Started DotChatApplication in X seconds"
-# "Tomcat started on port 8089"
-# "Listen on 0.0.0.0:9326"
-```
-
-**步骤3: 验证修复**
-- 打开浏览器访问: http://localhost/login-test.html
-- 点击"测试服务连接"
-- 输入测试账号密码，点击"测试登录"
-
-#### 🔧 具体原因分析
-
-1. **多Java进程冲突**: 
-   - 现象：有多个java.exe进程运行
-   - 解决：杀掉所有Java进程，重新启动一个
-
-2. **端口未监听**:
-   - 现象：8089端口没有监听
-   - 解决：检查后端启动日志，确认没有错误
-
-3. **数据库连接问题**:
-   - 现象：后端启动报错
-   - 解决：确保MySQL和Redis服务正常运行
-
-4. **防火墙拦截**:
-   - 现象：服务启动但无法访问
-   - 解决：检查Windows防火墙设置
-
-#### ⚡ 应急方案
-
-如果上述方法都无效，可以尝试：
-
-1. **使用演示模式**（无需数据库）：
-```bash
-# 创建演示配置（已包含在项目中）
-java -jar target/dot-chat.jar --spring.profiles.active=demo
-```
-
-2. **完全重置**：
-```bash
-# 1. 重新编译
-cd dot-chat-server
-mvn clean package -DskipTests
-
-# 2. 重新启动
-java -jar target/dot-chat.jar --spring.profiles.active=dev
-```
-
-#### 📞 技术支持
-
-如果问题仍未解决，请提供以下信息：
-- 系统状态截图（来自 login-test.html）
-- 后端启动日志（logs/info.log）
-- 错误日志（logs/error.log）
-- Java进程信息
-
----
-
-### ❗ 其他常见问题
-
-**问题**: WebSocket连接失败
-**解决**: 检查9326端口是否被占用，重启服务
-
-**问题**: 静态资源404
-**解决**: 确认nginx正在运行，检查配置文件
-
-**问题**: Token过期
-**解决**: 清除浏览器缓存，重新登录
-
-## 📈 性能优化建议
-
-### 开发环境
-- 内存: 最少4GB可用内存
-- JVM参数: `-Xmx512m -Xms256m`
-- 数据库: 使用本地MySQL实例
-
-### 生产环境
-- 内存: 推荐8GB+
-- JVM参数: `-Xmx2g -Xms1g`
-- 数据库: 独立MySQL服务器
-- 缓存: Redis集群
-
----
-
-*如果您按照上述步骤操作后登录功能恢复正常，说明问题已解决。该诊断工具和解决方案覆盖了99%的登录问题场景。*
-
+**最终访问地址**: `http://localhost` (使用账号 `18805250558`，密码 `666666`)
+
+## 功能特性
+- ✅ 用户注册登录
+- ✅ 单聊/群聊
+- ✅ 文件传输
+- ✅ 语音/视频通话
+- ✅ 群内小组聊天
+- ✅ 消息推送
+- ✅ 管理后台
+
+## 技术栈
+- **后端**: Spring Boot, MyBatis Plus, TIO WebSocket
+- **前端**: jQuery, HTML5, CSS3
+- **数据库**: MySQL, Redis
+- **代理**: Nginx
+
+## 开发者
+- 作者: 吴安然
+- 联系方式: 请通过项目Issues联系
+
+## 许可证
+Apache License 2.0 

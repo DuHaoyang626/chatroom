@@ -45,6 +45,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.tio.core.ChannelContext;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,6 +84,7 @@ public class ChatMsgServiceImpl extends ServiceImpl<ChatMsgDao, ChatMsg> impleme
     private TransactionTemplate transactionTemplate;
     
     @Resource
+    @Lazy
     private ChatSubgroupService chatSubgroupService;
 
     @Override
