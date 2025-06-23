@@ -38,10 +38,22 @@ public class ChatUserSimResponse implements Serializable {
     private String nickname;
 
     /**
-     * 头像
+     * 用户头像
      */
-    @Schema(description = "头像")
+    @Schema(description = "用户头像")
     private String avatar;
+
+    /**
+     * 用户性别
+     */
+    @Schema(description = "用户性别")
+    private Integer sex;
+
+    /**
+     * 个性签名
+     */
+    @Schema(description = "个性签名")
+    private String signature;
 
     /**
      * 是否好友
