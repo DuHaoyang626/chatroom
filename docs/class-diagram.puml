@@ -1,0 +1,147 @@
+@startuml ChatRoom
+
+' 用户管理相关类
+class User {
+  -String userId
+  -String username
+  -String password
+  -String nickname
+  -boolean online
+  -int maxChatWindows
+  +boolean login()
+  +void logout()
+  +boolean openChatWindow(Chat chat)
+  +void closeChatWindow(Chat chat)
+  +void sendMessage(Message message)
+  +void receiveMessage(Message message)
+}
+
+class UserManager {
+  -List<User> onlineUsers
+  +void addOnlineUser(User user)
+  +void removeOnlineUser(User user)
+  +boolean isUserOnline(String userId)
+  +void broadcastUserStatus(User user)
+}
+
+' 聊天核心类
+abstract class Chat {
+  #String chatId
+  #List<Message> messageHistory
+  #List<User> participants
+  +void addParticipant(User user)
+  +void removeParticipant(User user)
+  +void sendMessage(Message message)
+  +List<Message> getHistory()
+}
+
+class PrivateChat extends Chat {
+  -User sender
+  -User receiver
+  +void initializeChat()
+}
+
+class GroupChat extends Chat {
+  -String groupName
+  -User owner 
+  -List<User> admins
+  -int maxMembers
+  +void addAdmin(User user)
+  +void removeAdmin(User user)
+  +void dissolveGroup()
+}
+
+' 消息相关类
+class Message {
+  -String messageId
+  -User sender
+  -String content
+  -MessageType type
+  -Date timestamp
+  -boolean isRead
+  +void save()
+  +void markAsRead()
+}
+
+enum MessageType {
+  TEXT
+  FILE
+  IMAGE
+  SYSTEM
+}
+
+' 界面相关类
+class ChatWindow {
+  -String windowId
+  -Chat chat
+  -List<Message> displayMessages
+  -boolean isActive
+  +void display()
+  +void close()
+  +void refresh()
+  +void sendMessage(Message message)
+}
+
+class ChatGUI {
+  -List<ChatWindow> windows
+  +void createChatWindow(Chat chat)
+  +void updateUserList()
+  +void displayMessage(Message message)
+  +void showError(String message)
+}
+
+' 服务端类
+class ChatServer {
+  -ServerSocket serverSocket
+  -List<ClientHandler> clients
+  -UserManager userManager
+  -MessageRepository messageRepo
+  +void start()
+  +void stop()
+  +void broadcast(Message message)
+  +void handleClientConnection(Socket socket)
+}
+
+class ClientHandler {
+  -Socket clientSocket
+  -User user
+  -ObjectInputStream in
+  -ObjectOutputStream out
+  +void run()
+  +void sendMessage(Message message)
+  +void disconnect()
+}
+
+' 数据存储类
+class MessageRepository {
+  -Connection dbConnection
+  +void saveMessage(Message message)
+  +List<Message> getMessageHistory(Chat chat)
+  +void deleteMessages(Chat chat)
+}
+
+class FileTransfer {
+  -String fileId
+  -String fileName
+  -long fileSize
+  -User sender
+  -Chat chat
+  +boolean upload()
+  +boolean download()
+  +void cancel()
+}
+
+' 关系定义
+User "1" -- "*" ChatWindow : opens >
+User "*" -- "*" Chat : participates in >
+Chat "1" -- "*" Message : contains >
+ChatServer "1" -- "*" ClientHandler : manages >
+ChatServer "1" -- "1" UserManager : uses >
+ChatServer "1" -- "1" MessageRepository : uses >
+ChatGUI "1" -- "*" ChatWindow : displays >
+Message "1" -- "1" MessageType : has >
+Chat <|-- PrivateChat
+Chat <|-- GroupChat
+Message "*" -- "1" FileTransfer : may have >
+
+@enduml

@@ -18,15 +18,10 @@
         <div class="sendto">
             <div class="but-nav">
                 <ul>
-                    <li id="nav-face"><img src="ico/im-face.png" alt="表情"/></li>
-                    <li id="nav-picture" onclick="chatMsgPictureClick();">
+                    <li id="nav-face"><img src="ico/im-face.png" alt="表情"/></li>                    <li id="nav-picture" onclick="chatMsgPictureClick();">
                         <img src="ico/im-pic.png" alt="图片"/>
                     </li>
                     <input type="file" id="imageInput" style="display: none" accept="image/*"/>
-                    <li id="nav-video" onclick="chatMsgVideoClick();">
-                        <img src="ico/im-video.png" alt="视频"/>
-                    </li>
-                    <input type="file" id="videoInput" style="display: none" accept="video/*"/>
                     <li id="nav-file" onclick="chatMsgFileClick()">
                         <img src="ico/im-file.png" alt="文件"/>
                     </li>
@@ -38,11 +33,8 @@
                         <img src="ico/msg.png" alt="历史记录"/>
                     </li>
                     <li id="nav-audio-call" class="call" onclick="sendInviteCall('AUDIO_CALL')">
-                        <img src="ico/call_audio_pc.png" alt="语音通话"/></li>
-                    <li id="nav-video-call" class="call" onclick="sendInviteCall('VIDEO_CALL')">
+                        <img src="ico/call_audio_pc.png" alt="语音通话"/></li>                    <li id="nav-video-call" class="call" onclick="sendInviteCall('VIDEO_CALL')">
                         <img src="ico/call_video_pc.png" alt="视频通话"/></li>
-                    <li id="nav-ai-reply-msg" class="ai-reply-msg">
-                        <img class="ai-reply-msg-icon" src="ico/ai_icon.png" alt="Ai智能回复"/></li>
                 </ul>
             </div>
             <div class="but-text">

@@ -1,0 +1,50 @@
+@startuml 群聊语音通话顺序图
+
+actor 发起用户 as Caller
+participant "客户端GUI" as GUI
+participant "音视频模块" as Media
+participant "聊天服务器" as Server
+participant "群组管理器" as GroupManager
+collections "群成员客户端" as Members
+
+== 发起群聊语音通话 ==
+Caller -> GUI: 点击语音通话按钮
+activate GUI
+GUI -> Media: 初始化音频设备
+activate Media
+Media --> GUI: 设备就绪
+GUI -> Server: 发送群语音通话请求
+activate Server
+
+Server -> GroupManager: 获取群成员列表
+activate GroupManager
+GroupManager --> Server: 返回在线成员列表
+deactivate GroupManager
+
+Server -> Members: 广播语音通话邀请
+activate Members
+
+loop 等待成员响应
+    alt 成员接受
+        Members -> Server: 发送接受响应
+        Server -> Media: 建立音频连接
+    else 成员拒绝
+        Members -> Server: 发送拒绝响应
+        Server -> GUI: 更新拒绝状态
+    else 成员超时
+        Server -> GUI: 更新超时状态
+    end
+end
+
+alt 至少有成员接受
+    Server -> Media: 创建语音房间
+    Media -> Media: 初始化音频流
+    Media -> Members: 建立P2P连接
+    Media --> GUI: 连接成功
+    GUI --> Caller: 显示语音通话界面
+else 无成员接受
+    Server --> GUI: 返回取消通知
+    GUI --> Caller: 显示取消提示
+end
+
+@enduml
