@@ -3399,7 +3399,7 @@ html, body {
 
 /* 小组对话框通用头部样式 */
 .subgroup-dialog-header {
-    background-color: #2196F3;
+    background-color: #07c160;
     color: white;
     padding: 10px 15px;
     display: flex;
@@ -3537,6 +3537,35 @@ html, body {
     border-bottom: 1px solid #eee;
 }
 
+.subgroup-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.leader-badge {
+    color: #07c160;
+    font-size: 12px;
+    font-weight: bold;
+    background: #e8f5e8;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 8px;
+}
+
+.subgroup-tip {
+    margin: 10px 0;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-left: 3px solid #07c160;
+    border-radius: 4px;
+}
+
+.tip-text {
+    color: #666;
+    font-size: 13px;
+}
+
 .subgroup-name {
     font-weight: bold;
     font-size: 16px;
@@ -3544,7 +3573,7 @@ html, body {
 }
 
 .subgroup-action-btn {
-    background-color: #2196F3;
+    background-color: #07c160;
     color: white;
     border: none;
     padding: 6px 12px;
@@ -3706,7 +3735,7 @@ html, body {
 }
 
 .subgroup-chat-header {
-    background-color: #2196F3;
+    background-color: #07c160;
     color: white;
     padding: 8px 15px;
     display: flex;
@@ -3766,7 +3795,7 @@ html, body {
 }
 
 .subgroup-chat-messages li.self {
-    background-color: #2196F3;
+    background-color: #07c160;
     color: white;
     margin-left: auto;
     text-align: right;
@@ -3834,7 +3863,7 @@ html, body {
 }
 
 .subgroup-send-btn {
-    background-color: #2196F3;
+    background-color: #07c160;
     color: white;
     border: none;
     padding: 8px 16px;

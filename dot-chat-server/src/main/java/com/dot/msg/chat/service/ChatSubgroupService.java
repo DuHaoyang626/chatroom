@@ -64,6 +64,15 @@ public interface ChatSubgroupService {
     Boolean leaveSubgroup(Integer subgroupId, Integer userId);
 
     /**
+     * 解散小组（仅组长可操作）
+     *
+     * @param subgroupId 小组ID
+     * @param userId 用户ID（必须是组长）
+     * @return 是否成功
+     */
+    Boolean dissolveSubgroup(Integer subgroupId, Integer userId);
+
+    /**
      * 发送小组消息
      *
      * @param subgroupId 小组ID

@@ -292,6 +292,9 @@
                     </div>
                     <button class="primarybtn" onclick="searchSubgroupMemberClick()">查找</button>
                 </div>
+                <div class="subgroup-tip">
+                    <span class="tip-text">💡 至少选择1个成员，加上您就是2人小组</span>
+                </div>
                 <div class="search-user-list">
                     <ul id="subgroup-member-list" class="subgroup-member-list-ul">
                         <!-- 可邀请的群成员列表 -->
@@ -313,8 +316,17 @@
                 <div id="current-subgroup-info" class="current-subgroup-info hide">
                     <div class="subgroup-header">
                         <span class="subgroup-name"></span>
-                        <button class="subgroup-action-btn" onclick="enterSubgroupChat()">进入聊天</button>
-                        <button class="subgroup-action-btn subgroup-leave-btn" onclick="leaveSubgroupClick()">退出小组</button>
+                        <div class="subgroup-actions">
+                            <button class="subgroup-action-btn" onclick="enterSubgroupChat()">进入聊天</button>
+                            <!-- 组长操作按钮 -->
+                            <div class="subgroup-leader-actions" style="display: none;">
+                                <button class="subgroup-action-btn" onclick="dissolveSubgroupClick()">解散小组</button>
+                            </div>
+                            <!-- 普通成员操作按钮 -->
+                            <div class="subgroup-member-actions" style="display: none;">
+                                <button class="subgroup-action-btn subgroup-leave-btn" onclick="leaveSubgroupClick()">退出小组</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="subgroup-members">
                         <label class="subgroup-members-title">小组成员：</label>

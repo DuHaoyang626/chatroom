@@ -106,6 +106,19 @@ public class ChatSubgroupController {
     }
 
     /**
+     * 解散小组（仅组长可操作）
+     */
+    @PostMapping("/dissolve")
+    @Operation(summary = "解散小组")
+    public ResultBean<Boolean> dissolveSubgroup(
+            @RequestParam("subgroupId") @NotNull(message = "小组ID不能为空") Integer subgroupId) {
+        
+        ChatUserResponse currentUser = chatUserService.getCurrentChatUser();
+        Boolean result = chatSubgroupService.dissolveSubgroup(subgroupId, currentUser.getId());
+        return ResultBean.result(result);
+    }
+
+    /**
      * 发送小组消息
      */
     @PostMapping("/sendMessage")

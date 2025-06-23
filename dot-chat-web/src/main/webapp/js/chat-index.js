@@ -3891,11 +3891,13 @@ function selectSubgroupMember(element) {
 
 /**
  * 检查是否可以创建小组
+ * 规则：小组名称至少2个字符，至少选择1个成员（加上创建者就是2人）
  */
 function checkCreateSubgroupEnabled() {
     let subgroupName = $("#subgroup-name-input").val().trim();
     let selectedMembers = $("#subgroup-member-list li.selected").length;
     
+    // 至少选择1个成员，加上创建者就是2人小组
     let canCreate = subgroupName.length >= 2 && selectedMembers > 0;
     $(".create-subgroup-btn").prop("disabled", !canCreate);
 }
@@ -3916,7 +3918,7 @@ function createSubgroupClick() {
     });
     
     if (selectedMemberIds.length === 0) {
-        myAlert("", "请至少选择一个成员", "err");
+        myAlert("", "请至少选择一个成员（加上您就是2人小组）", "err");
         return;
     }
     
@@ -3994,6 +3996,23 @@ function showCurrentSubgroupInfo(subgroupInfo) {
     
     $(".subgroup-name").text(subgroupInfo.name);
     
+    // 检查当前用户是否是组长
+    let isLeader = subgroupInfo.creatorId === chatUser.id;
+    
+    // 显示/隐藏组长操作按钮
+    if (isLeader) {
+        $(".subgroup-leader-actions").show();
+        $(".subgroup-member-actions").hide();
+        // 显示组长标识
+        $(".subgroup-name").append(' <span class="leader-badge">(组长)</span>');
+    } else {
+        $(".subgroup-leader-actions").hide();
+        $(".subgroup-member-actions").show();
+    }
+    
+    // 存储小组信息到全局变量，供其他函数使用
+    window.currentSubgroupInfo = subgroupInfo;
+    
     // 加载小组成员
     loadSubgroupMembers(subgroupInfo.id);
 }
@@ -4016,15 +4035,38 @@ function loadSubgroupMembers(subgroupId) {
     ajaxSyncRequest(url, "get", data, null, function(res) {
         if (res.code === 200) {
             let membersHtml = "";
+            let memberCount = res.data ? res.data.length : 0;
+            
             for (let member of res.data) {
+                // 如果后端没有返回用户详细信息，尝试从本地群成员列表获取
+                let memberInfo = member;
+                if (!member.nickname || !member.avatar) {
+                    let groupMemberList = getLocalGroupMemberList();
+                    if (groupMemberList) {
+                        let localMember = groupMemberList.find(m => m.userId === member.userId);
+                        if (localMember) {
+                            memberInfo = {
+                                ...member,
+                                nickname: localMember.nickname,
+                                avatar: localMember.avatar
+                            };
+                        }
+                    }
+                }
+                
                 membersHtml += `
                     <li>
-                        <img class="member-avatar" src="${member.avatar}" alt="">
-                        <span class="member-name">${member.nickname}</span>
+                        <img class="member-avatar" src="${memberInfo.avatar || '/images/default-avatar.png'}" alt="">
+                        <span class="member-name">${memberInfo.nickname || '未知用户'}</span>
                     </li>
                 `;
             }
+            
             $(".subgroup-members-list").html(membersHtml);
+            
+            // 更新成员数量显示
+            $("#subgroup-member-count").text(`(${memberCount}人)`);
+            $(".subgroup-chat-title").text(`小组聊天(${memberCount}人)`);
         }
     });
 }
@@ -4094,6 +4136,39 @@ function leaveSubgroupClick() {
                 }
             });
         }
+    });
+}
+
+/**
+ * 解散小组（仅组长可操作）
+ */
+function dissolveSubgroupClick() {
+    if (!confirm("确定要解散当前小组吗？解散后所有成员将被移除，此操作不可恢复！")) {
+        return;
+    }
+    
+    if (!window.currentSubgroupInfo) {
+        myAlert("", "获取小组信息失败", "err");
+        return;
+    }
+    
+    let subgroupId = window.currentSubgroupInfo.id;
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/dissolve`;
+    let data = { subgroupId: subgroupId };
+    
+    ajaxSyncRequest(url, "post", data, null, function(res) {
+        if (res.code === 200) {
+            myAlert("", "小组已解散", "suc");
+            showNoSubgroupInfo();
+            closeSubgroupChat();
+            // 清除全局小组信息
+            window.currentSubgroupInfo = null;
+        } else {
+            myAlert("", res.message || "解散小组失败", "err");
+        }
+    }, function(error) {
+        myAlert("", "网络错误，解散小组失败", "err");
+        logger.error("解散小组API请求失败:", error);
     });
 }
 
