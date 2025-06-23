@@ -1,6 +1,7 @@
 package com.dot.msg.chat.controller;
 
 import com.dot.comm.entity.ResultBean;
+import com.dot.comm.exception.ApiException;
 import com.dot.msg.chat.model.ChatSubgroup;
 import com.dot.msg.chat.model.ChatSubgroupInvite;
 import com.dot.msg.chat.model.ChatSubgroupMember;
@@ -17,7 +18,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 群内小组管理控制器
@@ -71,12 +74,46 @@ public class ChatSubgroupController {
      */
     @PostMapping("/accept")
     @Operation(summary = "接受小组邀请")
-    public ResultBean<Boolean> acceptInvite(
-            @RequestParam("inviteId") @NotNull(message = "邀请ID不能为空") Integer inviteId) {
+    public ResultBean<Boolean> acceptInvite(@RequestParam("inviteId") Integer inviteId) {
+        log.info("【控制器-接受小组邀请】请求开始: inviteId={}", inviteId);
         
-        ChatUserResponse currentUser = chatUserService.getCurrentChatUser();
-        Boolean result = chatSubgroupService.acceptSubgroupInvite(inviteId, currentUser.getId());
-        return ResultBean.result(result);
+        try {
+            // 1. 参数验证
+            if (inviteId == null) {
+                log.warn("【控制器-接受小组邀请】参数错误: inviteId为空");
+                return ResultBean.validateFailed("邀请ID不能为空");
+            }
+            
+            // 2. 用户身份验证
+            ChatUserResponse currentUser = chatUserService.getCurrentChatUser();
+            if (currentUser == null) {
+                log.warn("【控制器-接受小组邀请】用户未登录: inviteId={}", inviteId);
+                return ResultBean.unauthorized();
+            }
+            
+            log.info("【控制器-接受小组邀请】开始处理: inviteId={}, userId={}", inviteId, currentUser.getId());
+            
+            // 3. 调用服务层处理
+            Boolean result = chatSubgroupService.acceptSubgroupInvite(inviteId, currentUser.getId());
+            
+            if (result != null && result) {
+                log.info("【控制器-接受小组邀请】处理成功: inviteId={}, userId={}", inviteId, currentUser.getId());
+                return ResultBean.success(true, "成功加入小组");
+            } else {
+                log.warn("【控制器-接受小组邀请】处理失败: inviteId={}, userId={}, result={}", 
+                    inviteId, currentUser.getId(), result);
+                return ResultBean.failed("加入小组失败");
+            }
+            
+        } catch (ApiException e) {
+            // 业务异常，返回具体错误信息
+            log.warn("【控制器-接受小组邀请】业务异常: inviteId={}, error={}", inviteId, e.getMessage());
+            return ResultBean.failed(e.getMessage());
+        } catch (Exception e) {
+            // 系统异常，返回通用错误信息
+            log.error("【控制器-接受小组邀请】系统异常: inviteId={}, error={}", inviteId, e.getMessage(), e);
+            return ResultBean.failed("系统繁忙，请稍后重试");
+        }
     }
 
     /**
@@ -84,12 +121,46 @@ public class ChatSubgroupController {
      */
     @PostMapping("/reject")
     @Operation(summary = "拒绝小组邀请")
-    public ResultBean<Boolean> rejectInvite(
-            @RequestParam("inviteId") @NotNull(message = "邀请ID不能为空") Integer inviteId) {
+    public ResultBean<Boolean> rejectInvite(@RequestParam("inviteId") Integer inviteId) {
+        log.info("【控制器-拒绝小组邀请】请求开始: inviteId={}", inviteId);
         
-        ChatUserResponse currentUser = chatUserService.getCurrentChatUser();
-        Boolean result = chatSubgroupService.rejectSubgroupInvite(inviteId, currentUser.getId());
-        return ResultBean.result(result);
+        try {
+            // 1. 参数验证
+            if (inviteId == null) {
+                log.warn("【控制器-拒绝小组邀请】参数错误: inviteId为空");
+                return ResultBean.validateFailed("邀请ID不能为空");
+            }
+            
+            // 2. 用户身份验证
+            ChatUserResponse currentUser = chatUserService.getCurrentChatUser();
+            if (currentUser == null) {
+                log.warn("【控制器-拒绝小组邀请】用户未登录: inviteId={}", inviteId);
+                return ResultBean.unauthorized();
+            }
+            
+            log.info("【控制器-拒绝小组邀请】开始处理: inviteId={}, userId={}", inviteId, currentUser.getId());
+            
+            // 3. 调用服务层处理
+            Boolean result = chatSubgroupService.rejectSubgroupInvite(inviteId, currentUser.getId());
+            
+            if (result != null && result) {
+                log.info("【控制器-拒绝小组邀请】处理成功: inviteId={}, userId={}", inviteId, currentUser.getId());
+                return ResultBean.success(true, "已拒绝邀请");
+            } else {
+                log.warn("【控制器-拒绝小组邀请】处理失败: inviteId={}, userId={}, result={}", 
+                    inviteId, currentUser.getId(), result);
+                return ResultBean.failed("拒绝邀请失败");
+            }
+            
+        } catch (ApiException e) {
+            // 业务异常，返回具体错误信息
+            log.warn("【控制器-拒绝小组邀请】业务异常: inviteId={}, error={}", inviteId, e.getMessage());
+            return ResultBean.failed(e.getMessage());
+        } catch (Exception e) {
+            // 系统异常，返回通用错误信息
+            log.error("【控制器-拒绝小组邀请】系统异常: inviteId={}, error={}", inviteId, e.getMessage(), e);
+            return ResultBean.failed("系统繁忙，请稍后重试");
+        }
     }
 
     /**
@@ -152,9 +223,27 @@ public class ChatSubgroupController {
     @GetMapping("/invites")
     @Operation(summary = "获取小组邀请列表")
     public ResultBean<List<ChatSubgroupInvite>> getInvites() {
-        ChatUserResponse currentUser = chatUserService.getCurrentChatUser();
-        List<ChatSubgroupInvite> invites = chatSubgroupService.getUserSubgroupInvites(currentUser.getId());
-        return ResultBean.success(invites);
+        System.out.println("=== 获取小组邀请API调用 ===");
+        
+        try {
+            ChatUserResponse currentUser = chatUserService.getCurrentChatUser();
+            if (currentUser == null) {
+                System.out.println("用户未登录");
+                return ResultBean.success(new ArrayList<>());
+            }
+            
+            System.out.println("当前登录用户: ID=" + currentUser.getId() + ", 昵称=" + currentUser.getNickname());
+            
+            List<ChatSubgroupInvite> invites = chatSubgroupService.getUserSubgroupInvites(currentUser.getId());
+            System.out.println("控制器收到结果: " + (invites != null ? invites.size() : 0) + "条邀请");
+            
+            return ResultBean.success(invites != null ? invites : new ArrayList<>());
+            
+        } catch (Exception e) {
+            System.out.println("控制器异常: " + e.getMessage());
+            e.printStackTrace();
+            return ResultBean.success(new ArrayList<>());
+        }
     }
 
     /**

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试小组邀请修复</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <h1>小组邀请功能测试</h1>
+    
+    <div>
+        <h2>1. 获取小组邀请列表</h2>
+        <button onclick="getInvites()">获取邀请列表</button>
+        <div id="invites-result"></div>
+    </div>
+    
+    <div>
+        <h2>2. 接受小组邀请</h2>
+        <input type="number" id="inviteId" placeholder="邀请ID" value="6">
+        <button onclick="acceptInvite()">接受邀请</button>
+        <div id="accept-result"></div>
+    </div>
+    
+    <script>
+        // 模拟用户ID
+        const userId = 6;
+        const baseUrl = 'http://localhost:8089/api/msg/chat/subgroup';
+        
+        function getInvites() {
+            $.ajax({
+                url: baseUrl + '/invites',
+                method: 'GET',
+                success: function(response) {
+                    console.log('邀请列表响应:', response);
+                    $('#invites-result').html('<pre>' + JSON.stringify(response, null, 2) + '</pre>');
+                },
+                error: function(xhr, status, error) {
+                    console.error('获取邀请列表失败:', error);
+                    $('#invites-result').html('<div style="color:red">错误: ' + error + '</div>');
+                }
+            });
+        }
+        
+        function acceptInvite() {
+            const inviteId = $('#inviteId').val();
+            if (!inviteId) {
+                alert('请输入邀请ID');
+                return;
+            }
+            
+            $.ajax({
+                url: baseUrl + '/accept',
+                method: 'POST',
+                data: 'inviteId=' + inviteId,
+                contentType: 'application/x-www-form-urlencoded',
+                success: function(response) {
+                    console.log('接受邀请响应:', response);
+                    $('#accept-result').html('<pre>' + JSON.stringify(response, null, 2) + '</pre>');
+                },
+                error: function(xhr, status, error) {
+                    console.error('接受邀请失败:', error);
+                    $('#accept-result').html('<div style="color:red">错误: ' + error + '</div>');
+                }
+            });
+        }
+        
+        // 页面加载时自动获取邀请列表
+        $(document).ready(function() {
+            console.log('页面加载完成，准备测试小组邀请功能');
+        });
+    </script>
+</body>
+</html> 

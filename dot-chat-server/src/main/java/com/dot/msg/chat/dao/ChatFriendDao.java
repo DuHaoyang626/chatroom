@@ -17,14 +17,14 @@ import java.util.List;
 public interface ChatFriendDao extends BaseMapper<ChatFriend> {
 
 
-    @Select("select cu.phone as nickname,cu.signature,cu.avatar, cu.sex, cu.is_online, cf.remark, cf.friend_id, cf.is_top, cf.initial " +
+    @Select("select if(length(cu.nickname)>0,cu.nickname,cu.phone) as nickname,cu.signature,cu.avatar, cu.sex, cu.is_online, cf.remark, cf.friend_id, cf.is_top, cf.initial " +
             "from chat_friend cf " +
             "inner join chat_user cu on cu.id=cf.friend_id " +
             "where cf.user_id=#{userId} ${andSql} " +
-            "order by cf.is_top desc, cf.initial, cu.phone ")
+            "order by cf.is_top desc, cf.initial, if(length(cu.nickname)>0,cu.nickname,cu.phone) ")
     List<ChatUserFriendDto> selectChatUserFriendList(@Param("userId") Integer userId, @Param("andSql") String andSql);
 
-    @Select("select cu.phone as nickname, cu.avatar, cu.sex,cu.signature, cu.is_online, cf.friend_id,cf.remark,cf.label,cf.source " +
+    @Select("select if(length(cu.nickname)>0,cu.nickname,cu.phone) as nickname, cu.avatar, cu.sex,cu.signature, cu.is_online, cf.friend_id,cf.remark,cf.label,cf.source " +
             "from chat_friend cf " +
             "inner join chat_user cu on cu.id=cf.friend_id " +
             "where cf.user_id=#{userId} and cf.friend_id=#{friendId}")

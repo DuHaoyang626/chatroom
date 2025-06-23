@@ -13,7 +13,7 @@ import java.util.List;
  * <p>
  * 聊天室用户表(关联管理员表和企业用户表) Mapper 接口
  * </p>
- *
+ * 
  * @author Mybatis-Plus-Generator
  * @since 2023-06-07
  */
@@ -25,13 +25,13 @@ public interface ChatUserDao extends BaseMapper<ChatUser> {
      *
      * @return 聊天室用户列表
      */
-    @Select("select cu.id, if(length(cf.remark)>0,cf.remark,cu.phone) as nickname, cu.phone as olnickname, cu.avatar, cu.is_online, if(cf.id is null,true,false) isFriend " +
+    @Select("select cu.id, if(length(cf.remark)>0,cf.remark,cu.nickname) as nickname, cu.nickname as olnickname, cu.avatar, cu.is_online, if(cf.id is null,true,false) isFriend " +
             "from chat_user cu " +
             "left join chat_friend cf on cf.friend_id=cu.id and cf.user_id=#{currentUserId} " +
             "where cu.id in(${chatUserIds})")
     List<ChatUserSimDto> selectChatUserLeftFriendSimList(@Param("chatUserIds") String chatUserIds, @Param("currentUserId") Integer currentUserId);
 
-    @Select("select cu.id, cu.phone as nickname, cu.phone as olnickname, cu.avatar, cu.is_online, if(cf.id is null,true,false) isFriend " +
+    @Select("select cu.id, cu.nickname as nickname, cu.nickname as olnickname, cu.avatar, cu.is_online, if(cf.id is null,true,false) isFriend " +
             "from chat_user cu " +
             "left join chat_friend cf on cu.id = cf.friend_id and cf.user_id = #{userId} " +
             "where cu.phone like #{phone}")

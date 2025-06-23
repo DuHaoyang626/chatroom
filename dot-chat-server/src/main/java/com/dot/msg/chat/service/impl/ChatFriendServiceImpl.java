@@ -83,7 +83,7 @@ public class ChatFriendServiceImpl extends ServiceImpl<ChatFriendDao, ChatFriend
         }
         if (StringUtils.isNotBlank(keywords)) {
             keywords = StrUtils.mysqlSpecialCharEscape(keywords);
-            andSql = andSql + " and (cu.phone like '" + keywords + "%' or cf.remark like '%" + keywords + "%' or cu.phone like '%" + keywords + "%')";
+            andSql = andSql + " and (cu.nickname like '" + keywords + "%' or cf.remark like '%" + keywords + "%' or cu.nickname like '%" + keywords + "%')";
         }
         List<ChatUserFriendDto> chatUserFriendList = baseMapper.selectChatUserFriendList(userId, andSql);
         if (CollUtil.isEmpty(chatUserFriendList)) {

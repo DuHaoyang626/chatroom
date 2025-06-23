@@ -222,6 +222,90 @@ if (!senderName && !isOwn) {
 
 3. **确保功能纯净** - 小组聊天窗口仅支持文本消息，不包含表情、图片、文件功能
 
+#### 3. 小组邀请接受/拒绝功能重写
+
+**问题现象**: 接受或拒绝小组邀请时经常出现"系统异常"错误
+
+**问题原因**: 
+1. 事务处理不当，可能存在数据库锁等待或死锁
+2. 并发访问时数据一致性检查失败
+3. 异常处理不完整，没有区分业务异常和系统异常
+4. 缺少重复操作的幂等性处理
+
+**解决方案**:
+1. **完善参数验证** - 在控制器和服务层都进行参数校验：
+```java
+// 控制器层
+if (inviteId == null) {
+    log.warn("【控制器-接受小组邀请】参数错误: inviteId为空");
+    return ResultBean.validateFailed("邀请ID不能为空");
+}
+
+// 服务层
+if (inviteId == null || userId == null) {
+    log.error("【接受小组邀请】参数错误: inviteId={}, userId={}", inviteId, userId);
+    throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "参数不能为空");
+}
+```
+
+2. **增强业务逻辑验证** - 详细检查每个业务条件：
+```java
+// 检查邀请是否存在
+if (invite == null) {
+    log.error("【接受小组邀请】邀请不存在: inviteId={}", inviteId);
+    throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "邀请不存在");
+}
+
+// 检查邀请归属
+if (!invite.getInviteeId().equals(userId)) {
+    log.error("【接受小组邀请】邀请不属于当前用户: inviteId={}, userId={}, inviteeId={}", 
+        inviteId, userId, invite.getInviteeId());
+    throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "邀请不属于您");
+}
+```
+
+3. **实现幂等性处理** - 防止重复操作：
+```java
+// 检查用户是否已经是小组成员（防止重复加入）
+if (isSubgroupMember(invite.getSubgroupId(), userId)) {
+    log.warn("【接受小组邀请】用户已是小组成员: userId={}, subgroupId={}", userId, invite.getSubgroupId());
+    // 更新邀请状态为已接受
+    invite.setStatus(1);
+    invite.setHandleTime(DateUtil.now());
+    chatSubgroupInviteDao.updateById(invite);
+    return true;
+}
+```
+
+4. **优化异常处理** - 区分业务异常和系统异常：
+```java
+} catch (ApiException e) {
+    // 业务异常，返回具体错误信息
+    log.warn("【控制器-接受小组邀请】业务异常: inviteId={}, error={}", inviteId, e.getMessage());
+    return ResultBean.failed(e.getMessage());
+} catch (Exception e) {
+    // 系统异常，返回通用错误信息
+    log.error("【控制器-接受小组邀请】系统异常: inviteId={}, error={}", inviteId, e.getMessage(), e);
+    return ResultBean.failed("系统繁忙，请稍后重试");
+}
+```
+
+5. **完善日志记录** - 添加详细的操作日志，便于问题排查：
+```java
+log.info("【接受小组邀请】开始执行加入操作: userId={}, subgroupId={}", userId, invite.getSubgroupId());
+log.info("【接受小组邀请】用户成功加入小组: userId={}, subgroupId={}, memberId={}", 
+    userId, invite.getSubgroupId(), member.getId());
+log.info("【接受小组邀请】成功完成: userId={}, subgroupId={}, inviteId={}", 
+    userId, invite.getSubgroupId(), inviteId);
+```
+
+**重写后的改进**:
+- ✅ 消除了大部分"系统异常"错误
+- ✅ 支持重复操作的幂等性处理
+- ✅ 提供更清晰的错误提示信息
+- ✅ 增强了并发安全性
+- ✅ 完善了操作日志，便于问题排查
+
 ## 功能特性
 - ✅ 用户注册登录
 - ✅ 单聊/群聊

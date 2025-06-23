@@ -101,7 +101,7 @@ public class ChatGroupMemberServiceImpl extends ServiceImpl<ChatGroupMemberDao, 
         String andSql = "";
         if (StringUtils.isNotBlank(keywords)) {
             String keyword = "'%" + keywords + "%'";
-            andSql = "and (cgm.nickname like " + keyword + " or cf.remark like " + keyword + " or cu.phone like " + keyword + " or cu.phone like " + keyword + ")";
+            andSql = "and (cgm.nickname like " + keyword + " or cf.remark like " + keyword + " or cu.nickname like " + keyword + " or cu.nickname like " + keyword + ")";
         }
         return baseMapper.selectChatGroupMemberSimList(groupId, userId, andSql);
     }

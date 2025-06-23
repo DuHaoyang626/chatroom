@@ -4181,23 +4181,48 @@ function subgroupInvitesDialog() {
  * 加载小组邀请列表
  */
 function loadSubgroupInvites() {
-    let url = `${MSG_URL_PREFIX}/chat/subgroup/invites`;
+    console.log("=== 前端开始加载小组邀请列表 ===");
+    logger.info("=== 前端开始加载小组邀请列表 ===");
     
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/invites`;
+    console.log("请求URL:", url);
+    logger.info("请求URL: {}", url);
+    
+    // 使用更健壮的请求方式
     ajaxSyncRequest(url, "get", {}, null, function(res) {
-        if (res.code === 200) {
-            if (res.data && res.data.length > 0) {
-                showSubgroupInvites(res.data);
+        console.log("收到响应:", res);
+        logger.info("收到响应: {}", JSON.stringify(res));
+        
+        try {
+            // 无论什么情况都尝试处理响应
+            if (res && res.code === 200) {
+                console.log("响应成功，数据:", res.data);
+                logger.info("响应成功，数据: {}", JSON.stringify(res.data));
+                
+                if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+                    console.log("显示 " + res.data.length + " 个邀请");
+                    logger.info("显示 {} 个邀请", res.data.length);
+                    showSubgroupInvites(res.data);
+                } else {
+                    console.log("无邀请数据，显示空状态");
+                    logger.info("无邀请数据，显示空状态");
+                    showNoInvites();
+                }
             } else {
+                console.log("响应失败，显示空状态，错误:", res ? res.message : "未知错误");
+                logger.warn("响应失败，显示空状态，错误: {}", res ? res.message : "未知错误");
                 showNoInvites();
             }
-        } else {
+        } catch (e) {
+            console.error("处理响应时出错:", e);
+            logger.error("处理响应时出错", e);
             showNoInvites();
-            logger.warn("获取小组邀请列表失败:", res.message || "后端服务不可用");
         }
     }, function(error) {
-        // API请求失败时显示无邀请信息
+        console.error("请求失败:", error);
+        logger.error("请求失败: {}", error);
+        // 即使请求失败也显示空状态，而不是让用户看到错误
         showNoInvites();
-        logger.warn("小组邀请列表API请求失败，可能是后端服务未启动:", error);
     });
 }
 
@@ -4205,50 +4230,111 @@ function loadSubgroupInvites() {
  * 显示小组邀请列表
  */
 function showSubgroupInvites(invites) {
-    $("#no-invites-info").addClass("hide");
+    console.log("开始显示邀请列表，数量:", invites.length);
+    logger.info("开始显示邀请列表，数量: {}", invites.length);
     
-    let invitesHtml = "";
-    for (let invite of invites) {
-        invitesHtml += `
-            <li class="subgroup-invite-item">
-                <div class="invite-header">
-                    <span class="invite-subgroup-name">${invite.subgroupName}</span>
-                    <span class="invite-time">${invite.inviteTime}</span>
-                </div>
-                <div class="invite-from">邀请人：${invite.inviterNickname || '未知用户'}</div>
-                <div class="invite-actions">
-                    <button class="invite-accept-btn" onclick="acceptSubgroupInvite(${invite.id})">接受</button>
-                    <button class="invite-reject-btn" onclick="rejectSubgroupInvite(${invite.id})">拒绝</button>
-                </div>
-            </li>
-        `;
+    try {
+        $("#no-invites-info").addClass("hide");
+        
+        let invitesHtml = "";
+        for (let i = 0; i < invites.length; i++) {
+            let invite = invites[i];
+            console.log("处理邀请 " + (i + 1) + ":", invite);
+            logger.info("处理邀请 {}: {}", i + 1, JSON.stringify(invite));
+            
+            // 安全地获取邀请信息
+            let subgroupName = invite.subgroupName || "未知小组";
+            let inviterNickname = invite.inviterNickname || "未知用户";
+            let inviteTime = invite.inviteTime || "";
+            let inviteId = invite.id || 0;
+            
+            if (inviteId <= 0) {
+                console.warn("邀请ID无效，跳过:", invite);
+                logger.warn("邀请ID无效，跳过: {}", JSON.stringify(invite));
+                continue;
+            }
+            
+            invitesHtml += `
+                <li class="subgroup-invite-item">
+                    <div class="invite-header">
+                        <span class="invite-subgroup-name">${subgroupName}</span>
+                        <span class="invite-time">${inviteTime}</span>
+                    </div>
+                    <div class="invite-from">邀请人：${inviterNickname}</div>
+                    <div class="invite-actions">
+                        <button class="invite-accept-btn" onclick="acceptSubgroupInvite(${inviteId})">接受</button>
+                        <button class="invite-reject-btn" onclick="rejectSubgroupInvite(${inviteId})">拒绝</button>
+                    </div>
+                </li>
+            `;
+        }
+        
+        if (invitesHtml === "") {
+            console.log("没有有效的邀请，显示空状态");
+            logger.info("没有有效的邀请，显示空状态");
+            showNoInvites();
+            return;
+        }
+        
+        $("#subgroup-invites-list").html(invitesHtml);
+        console.log("邀请列表显示完成");
+        logger.info("邀请列表显示完成");
+        
+    } catch (e) {
+        console.error("显示邀请列表时出错:", e);
+        logger.error("显示邀请列表时出错", e);
+        showNoInvites();
     }
-    
-    $("#subgroup-invites-list").html(invitesHtml);
 }
 
 /**
  * 显示无邀请信息
  */
 function showNoInvites() {
-    $("#subgroup-invites-list").html("");
-    $("#no-invites-info").removeClass("hide");
+    console.log("显示无邀请状态");
+    logger.info("显示无邀请状态");
+    
+    try {
+        $("#subgroup-invites-list").html("");
+        $("#no-invites-info").removeClass("hide");
+        console.log("无邀请状态显示完成");
+        logger.info("无邀请状态显示完成");
+    } catch (e) {
+        console.error("显示无邀请状态时出错:", e);
+        logger.error("显示无邀请状态时出错", e);
+    }
 }
 
 /**
  * 接受小组邀请
  */
 function acceptSubgroupInvite(inviteId) {
-    let url = `${MSG_URL_PREFIX}/chat/subgroup/accept`;
-    let data = { inviteId: inviteId };
+    if (!inviteId) {
+        myAlert("", "邀请ID无效", "err");
+        return;
+    }
     
-    ajaxSyncRequest(url, "post", data, null, function(res) {
-        if (res.code === 200) {
-            myAlert("", "已加入小组", "suc");
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/accept`;
+    let data = `inviteId=${inviteId}`;
+    
+    logger.info("接受小组邀请:", { inviteId: inviteId, url: url });
+    
+    ajaxSyncRequest(url, "post", data, "application/x-www-form-urlencoded", function(res) {
+        logger.info("接受邀请响应:", res);
+        
+        if (res.code === 200 && res.success) {
+            myAlert("", "成功加入小组", "success");
             loadSubgroupInvites(); // 刷新邀请列表
             updateSubgroupInviteCount(); // 更新邀请数量
+            
+            // 刷新我的小组信息
+            if (typeof loadMySubgroupInfo === 'function') {
+                loadMySubgroupInfo();
+            }
         } else {
+            // 显示后端返回的具体错误信息
             myAlert("", res.message || "加入小组失败", "err");
+            logger.error("加入小组失败:", res);
         }
     });
 }
@@ -4257,16 +4343,27 @@ function acceptSubgroupInvite(inviteId) {
  * 拒绝小组邀请
  */
 function rejectSubgroupInvite(inviteId) {
-    let url = `${MSG_URL_PREFIX}/chat/subgroup/reject`;
-    let data = { inviteId: inviteId };
+    if (!inviteId) {
+        myAlert("", "邀请ID无效", "err");
+        return;
+    }
     
-    ajaxSyncRequest(url, "post", data, null, function(res) {
-        if (res.code === 200) {
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/reject`;
+    let data = `inviteId=${inviteId}`;
+    
+    logger.info("拒绝小组邀请:", { inviteId: inviteId, url: url });
+    
+    ajaxSyncRequest(url, "post", data, "application/x-www-form-urlencoded", function(res) {
+        logger.info("拒绝邀请响应:", res);
+        
+        if (res.code === 200 && res.success) {
             myAlert("", "已拒绝邀请", "info");
             loadSubgroupInvites(); // 刷新邀请列表
             updateSubgroupInviteCount(); // 更新邀请数量
         } else {
+            // 显示后端返回的具体错误信息
             myAlert("", res.message || "拒绝邀请失败", "err");
+            logger.error("拒绝邀请失败:", res);
         }
     });
 }

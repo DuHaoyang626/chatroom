@@ -5,6 +5,7 @@ import com.dot.msg.chat.model.ChatSubgroupMember;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -54,4 +55,16 @@ public interface ChatSubgroupMemberDao extends BaseMapper<ChatSubgroupMember> {
      */
     @Select("SELECT COUNT(*) FROM chat_subgroup_member WHERE subgroup_id = #{subgroupId} AND user_id = #{userId} AND status = 1")
     Integer isSubgroupMember(@Param("subgroupId") Integer subgroupId, @Param("userId") Integer userId);
+
+    /**
+     * 根据小组ID，将所有成员的状态更新为不活跃 (status=0)
+     */
+    @Update("UPDATE chat_subgroup_member SET status = 0 WHERE subgroup_id = #{subgroupId} AND status = 1")
+    int deactivateMembersBySubgroupId(@Param("subgroupId") Integer subgroupId);
+
+    /**
+     * 获取指定小组中的特定成员信息
+     */
+    @Select("SELECT * FROM chat_subgroup_member WHERE subgroup_id = #{subgroupId} AND user_id = #{userId} AND status = 1 LIMIT 1")
+    ChatSubgroupMember getMemberInfo(@Param("subgroupId") Integer subgroupId, @Param("userId") Integer userId);
 } 
