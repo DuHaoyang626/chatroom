@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * SSE 工具类
  *
- * @author: Dao-yang.
- * @date: Created in 2025/3/27 11:31
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 11:31
  */
 @Slf4j
 public class OkHttpSSEClient {

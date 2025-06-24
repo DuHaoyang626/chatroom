@@ -3,8 +3,8 @@ package com.dot.deepseek.constants;
 /**
  * DeepSeek AI 接口常量
  *
- * @author: Dao-yang.
- * @date: Created in 2025/2/6 10:10
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:10
  */
 public class DSConstant {
 

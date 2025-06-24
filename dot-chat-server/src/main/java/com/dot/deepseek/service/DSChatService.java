@@ -6,8 +6,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 /**
  * DeepSeek AI 服务接口
  *
- * @author: Dao-yang.
- * @date: Created in 2025/2/8 16:53
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 16:53
  */
 public interface DSChatService {
 

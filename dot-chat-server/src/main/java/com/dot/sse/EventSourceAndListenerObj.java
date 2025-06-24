@@ -6,8 +6,8 @@ import okhttp3.sse.EventSource;
 /**
  * EventSource和Listener封装对象
  *
- * @author: Dao-yang.
- * @date: Created in 2025/3/28 17:09
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 17:09
  */
 public record EventSourceAndListenerObj(EventSource eventSource, BaseEventSourceListener eventSourceListener) {
 }

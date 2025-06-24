@@ -5,8 +5,8 @@ import lombok.Data;
 /**
  * 聊天室配置
  *
- * @author: Dao-yang.
- * @date: Created in 2024/6/20 11:24
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 11:24
  */
 @Data
 public class ChatConfig {

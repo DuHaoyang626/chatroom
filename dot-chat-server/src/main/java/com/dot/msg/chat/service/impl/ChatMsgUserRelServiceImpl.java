@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 /**
  * 聊天信息和用户关联表服务接口实现
  *
- * @author Dao-yang
+ * @author BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang)
  * @date: 2024-01-10 09:56:44
  */
 @Slf4j

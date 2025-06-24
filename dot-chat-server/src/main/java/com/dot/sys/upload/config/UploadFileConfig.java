@@ -4,8 +4,8 @@ import lombok.Data;
 
 /**
  * 文件上传配置
- * @author: Dao-yang.
- * @date: Created in 2023/7/10 18:10
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 18:10
  */
 @Data
 public class UploadFileConfig {

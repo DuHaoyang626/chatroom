@@ -9,7 +9,7 @@ import java.io.Serializable;
 /**
  * 用户注册后添加默认好友事件
  *
- * @author Dao-yang
+ * @author BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang)
  * @date: 2024-02-29 17:11:01
  */
 

@@ -11,8 +11,8 @@ import java.util.Map;
 /**
  * 通话消息对象(语音通话/视频通话)
  *
- * @author: Dao-yang.
- * @date: Created in 2024/1/18 10:40
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:40
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)

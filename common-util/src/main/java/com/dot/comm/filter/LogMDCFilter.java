@@ -11,8 +11,8 @@ import org.slf4j.MDC;
 import java.io.IOException;
 
 /**
- * @author: Dao-yang.
- * @date: Created in 2023/5/16 15:06
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 15:06
  */
 @Slf4j
 public class LogMDCFilter implements Filter {

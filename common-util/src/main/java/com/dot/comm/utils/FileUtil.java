@@ -13,8 +13,8 @@ import java.nio.charset.StandardCharsets;
 /**
  * 文件工具
  *
- * @author: Dao-yang.
- * @date: Created in 2024/10/30 14:41
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 14:41
  */
 @Slf4j
 public class FileUtil {

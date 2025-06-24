@@ -5,8 +5,8 @@ import lombok.Getter;
 /**
  * SSE 事件源 key 枚举
  *
- * @author: Dao-yang.
- * @date: Created in 2024/4/18 10:06
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:06
  */
 @Getter
 public enum EventSourceKeyEm {

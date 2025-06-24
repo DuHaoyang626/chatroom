@@ -6,8 +6,8 @@ import java.net.UnknownHostException;
 /**
  * IP工具类
  *
- * @author: Dao-yang.
- * @date: Created in 2025/2/28 17:50
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 17:50
  */
 public class IPUtil {
 

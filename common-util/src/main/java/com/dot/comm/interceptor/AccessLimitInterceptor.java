@@ -18,8 +18,8 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 /**
- * @author: Dao-yang.
- * @date: Created in 2022/12/20 10:19
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:19
  */
 @Slf4j
 public class AccessLimitInterceptor implements HandlerInterceptor {

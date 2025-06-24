@@ -34,8 +34,8 @@ import java.nio.charset.StandardCharsets;
 /**
  * 群聊事件监听
  *
- * @author: Dao-yang.
- * @date: Created in 2024/3/19 16:57
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 16:57
  */
 @Slf4j
 @Component

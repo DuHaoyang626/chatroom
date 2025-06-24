@@ -15,7 +15,7 @@ import java.io.Serializable;
 /**
  * 用户聊天室表实体
  * 
- * @author Dao-yang
+ * @author BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang)
  * @date: 2024-01-10 09:56:44
  */
 @Data

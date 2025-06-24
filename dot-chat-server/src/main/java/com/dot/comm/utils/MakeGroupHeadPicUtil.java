@@ -19,8 +19,8 @@ import java.util.List;
 /**
  * 头像生成类型
  *
- * @author: Dao-yang.
- * @date: Created in 2024/3/19 14:04
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 14:04
  */
 @Slf4j
 public class MakeGroupHeadPicUtil {

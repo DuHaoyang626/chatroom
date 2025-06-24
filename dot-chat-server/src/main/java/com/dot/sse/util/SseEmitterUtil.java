@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Sse工具
  *
- * @author: Dao-yang.
- * @date: Created in 2025/2/8 17:39
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 17:39
  */
 @Slf4j
 public class SseEmitterUtil {

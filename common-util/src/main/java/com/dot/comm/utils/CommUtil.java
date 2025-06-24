@@ -14,8 +14,8 @@ import java.util.*;
 /**
  * 公共工具类
  *
- * @author: Dao-yang.
- * @date: Created in 2024/1/11 12:39
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 12:39
  */
 @Slf4j
 public class CommUtil {

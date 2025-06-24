@@ -3,8 +3,8 @@ package com.dot.msg.chat.em;
 /**
  * 设备类型枚举
  *
- * @author: Dao-yang.
- * @date: Created in 2024/1/18 10:43
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:43
  */
 public enum DeviceTypeEm {
 

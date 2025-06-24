@@ -6,8 +6,8 @@ import cn.hutool.core.thread.ThreadFactoryBuilder;
 import java.util.concurrent.*;
 
 /**
- * @author: Dao-yang.
- * @date: Created in 2023/7/31 10:38
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:38
  */
 public class ThreadPoolUtil {
 

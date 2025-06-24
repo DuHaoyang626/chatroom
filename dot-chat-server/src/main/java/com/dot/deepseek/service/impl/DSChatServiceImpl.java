@@ -22,8 +22,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.time.LocalDateTime;
 
 /**
- * @author: Dao-yang.
- * @date: Created in 2025/2/8 16:55
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 16:55
  */
 @Slf4j
 @Service

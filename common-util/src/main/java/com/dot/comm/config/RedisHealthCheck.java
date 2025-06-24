@@ -12,8 +12,8 @@ import java.util.Objects;
 /**
  * Redis健康检查
  *
- * @author: Dao-yang.
- * @date: Created in 2024/12/13 14:10
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 14:10
  */
 @Slf4j
 @Component

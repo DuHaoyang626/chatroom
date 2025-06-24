@@ -10,8 +10,8 @@ import java.util.function.Consumer;
 /**
  * 自定义SSE对象
  *
- * @author: Dao-yang.
- * @date: Created in 2025/4/1 16:23
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 16:23
  */
 @Slf4j
 @Getter

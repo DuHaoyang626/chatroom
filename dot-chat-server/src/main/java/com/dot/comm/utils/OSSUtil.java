@@ -20,8 +20,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * @author: Dao-yang.
- * @date: Created in 2022/6/23 14:29
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 14:29
  */
 @Slf4j
 public class OSSUtil {

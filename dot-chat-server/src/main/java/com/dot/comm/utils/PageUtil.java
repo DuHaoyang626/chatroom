@@ -9,8 +9,8 @@ import java.util.List;
 /**
  * 分页工具类
  *
- * @author: Dao-yang.
- * @date: Created in 2024/1/24 20:25
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 20:25
  */
 public class PageUtil {
 

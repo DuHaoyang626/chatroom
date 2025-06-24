@@ -15,8 +15,8 @@ import java.io.*;
 /**
  * 视频操作工具
  *
- * @author: Dao-yang.
- * @date: Created in 2024/6/14 09:34
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 09:34
  */
 @Slf4j
 public class VideoUtil {

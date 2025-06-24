@@ -48,8 +48,8 @@ import java.util.stream.Collectors;
 /**
  * 聊天信息发送服务
  *
- * @author: Dao-yang.
- * @date: Created in 2024/2/6 14:28
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 14:28
  */
 @Slf4j
 @Service

@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * 会话消息表数据Mapper
  * 
- * @author Dao-yang
+ * @author BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang)
  * @date: 2024-01-10 09:56:44
  */
 public interface ChatMsgDao extends BaseMapper<ChatMsg> {

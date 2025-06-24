@@ -19,8 +19,8 @@ import java.io.IOException;
 /**
  * DeepSeek智能回复事件监听
  *
- * @author: Dao-yang.
- * @date: Created in 2025/3/27 13:44
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 13:44
  */
 @Slf4j
 public class DeepSeekEventSourceListener extends BaseEventSourceListener {

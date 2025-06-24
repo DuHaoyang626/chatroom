@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * 管理员移除群成员事件
  *
- * @author Dao-yang
+ * @author BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang)
  * @date: 2024-02-29 17:11:01
  */
 

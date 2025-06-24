@@ -9,8 +9,8 @@ import org.tio.utils.time.Time;
 /**
  * Tio服务配置
  *
- * @author: Dao-yang.
- * @date: Created in 2024/1/10 19:00
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 19:00
  */
 @Data
 @Component

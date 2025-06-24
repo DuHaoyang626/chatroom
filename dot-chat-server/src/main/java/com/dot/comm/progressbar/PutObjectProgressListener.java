@@ -10,8 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author: Dao-yang.
- * @date: Created in 2022/6/22 10:11
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:11
  */
 @Slf4j
 public class PutObjectProgressListener implements ProgressListener {

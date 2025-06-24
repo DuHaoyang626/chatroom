@@ -7,8 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 /**
- * @author: Dao-yang.
- * @date: Created in 2022/6/21 15:05
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 15:05
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

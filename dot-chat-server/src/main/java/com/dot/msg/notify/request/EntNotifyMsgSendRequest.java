@@ -14,7 +14,7 @@ import java.io.Serializable;
 /**
  * 发送企业通知消息请求对象
  *
- * @author Dao-yang
+ * @author BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang)
  * @date: 2024-01-30 14:44:18
  */
 @Data

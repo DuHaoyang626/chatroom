@@ -26,8 +26,8 @@ import java.util.Map;
 /**
  * 二维码构建器
  *
- * @author: Dao-yang.
- * @date: Created in 2024/3/26 18:04
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 18:04
  */
 public class QrCodeBuilder {
     private static final QRCodeWriter qrCodeWriter = new QRCodeWriter();

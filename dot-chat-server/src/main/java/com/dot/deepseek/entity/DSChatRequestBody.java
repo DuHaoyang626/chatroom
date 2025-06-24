@@ -8,8 +8,8 @@ import java.util.Map;
 /**
  * DeepSeek AI 接口请求Body对象
  *
- * @author: Dao-yang.
- * @date: Created in 2025/2/6 10:15
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:15
  */
 @Data
 public class DSChatRequestBody {

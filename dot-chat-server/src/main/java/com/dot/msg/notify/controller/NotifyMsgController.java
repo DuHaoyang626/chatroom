@@ -18,8 +18,8 @@ import java.util.List;
 /**
  * 通知管理
  *
- * @author: Dao-yang.
- * @date: Created in 2024/1/10 18:11
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 18:11
  */
 @Validated
 @RestController

@@ -12,8 +12,8 @@ import java.nio.charset.StandardCharsets;
 /**
  * AES 加解密
  *
- * @author: Dao-yang.
- * @date: Created in 2024/10/31 17:22
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 17:22
  */
 public class AESUtil {
     /**

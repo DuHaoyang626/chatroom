@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * 群聊创建事件
  *
- * @author Dao-yang
+ * @author BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang)
  * @date: 2024-02-29 17:11:01
  */
 

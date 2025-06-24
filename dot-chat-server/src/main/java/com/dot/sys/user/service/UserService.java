@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * 用户表服务接口
  *
- * @author Dao-yang
+ * @author BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang)
  * @date: 2024-01-10 10:29:35
  */
 public interface UserService {

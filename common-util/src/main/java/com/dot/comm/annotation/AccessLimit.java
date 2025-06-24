@@ -8,8 +8,8 @@ import java.lang.annotation.Target;
 /**
  * 访问限制注解
  *
- * @author: Dao-yang.
- * @date: Created in 2022/12/20 10:16
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:16
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

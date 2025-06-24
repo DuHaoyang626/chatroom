@@ -12,7 +12,7 @@ import java.io.Serializable;
 /**
  * 添加聊天室消息记录请求对象
  *
- * @author Dao-yang
+ * @author BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang)
  * @date: 2024-01-10 09:56:44
  */
 @Data

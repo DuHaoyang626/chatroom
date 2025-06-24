@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 /**
  * 聊天室群组表服务接口实现
  *
- * @author Dao-yang
+ * @author BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang)
  * @date: 2024-01-10 09:56:44
  */
 @Slf4j

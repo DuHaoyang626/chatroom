@@ -18,8 +18,8 @@ import java.util.Map;
 /**
  * DeepSeek AI 工具类
  *
- * @author: Dao-yang.
- * @date: Created in 2025/2/6 10:44
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:44
  */
 @Slf4j
 public class DSUtils {

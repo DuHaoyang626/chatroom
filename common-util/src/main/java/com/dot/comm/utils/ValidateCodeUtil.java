@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * 验证码验证工具类
  *
- * @author: Dao-yang.
- * @date: Created in 2024/11/13 17:51
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 17:51
  */
 @Slf4j
 public class ValidateCodeUtil {

@@ -56,7 +56,7 @@ import java.util.Optional;
 /**
  * 聊天室新好友申请表服务接口实现
  *
- * @author Dao-yang
+ * @author BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang)
  * @date: 2024-01-10 09:56:44
  */
 @Slf4j

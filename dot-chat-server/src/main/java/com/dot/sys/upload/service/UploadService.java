@@ -7,8 +7,8 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * 上传文件服务
  *
- * @author: Dao-yang.
- * @date: Created in 2024/4/3 10:51
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:51
  */
 public interface UploadService {
 

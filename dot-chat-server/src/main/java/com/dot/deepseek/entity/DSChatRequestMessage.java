@@ -8,8 +8,8 @@ import lombok.Data;
 /**
  * DeepSeek AI 接口请求信息对象
  *
- * @author: Dao-yang.
- * @date: Created in 2025/2/6 10:17
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:17
  */
 @Data
 @Schema(name = "DSChatRequestMessage", description="DeepSeek AI 接口请求信息对象")

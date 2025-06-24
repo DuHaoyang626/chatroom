@@ -5,8 +5,8 @@ import lombok.Getter;
 /**
  * DeepSeek AI 角色枚举
  *
- * @author: Dao-yang.
- * @date: Created in 2025/2/6 10:20
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:20
  */
 @Getter
 public enum DSMessageRoleEm {

@@ -9,8 +9,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 /**
  * Redis 线上环境对象
  *
- * @author: Dao-yang.
- * @date: Created in 2024/11/6 15:36
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 15:36
  */
 public class RedisTemplateProdConfig {
 

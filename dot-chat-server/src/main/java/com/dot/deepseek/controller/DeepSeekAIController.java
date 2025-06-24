@@ -20,8 +20,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 /**
  * DeepSeek AI 控制器
  *
- * @author: Dao-yang.
- * @date: Created in 2025/2/6 11:43
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 11:43
  */
 @RestController
 @RequestMapping("api/deepseek/chat")

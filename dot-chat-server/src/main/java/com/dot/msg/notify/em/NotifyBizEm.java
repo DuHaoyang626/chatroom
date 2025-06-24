@@ -3,8 +3,8 @@ package com.dot.msg.notify.em;
 /**
  * 通知业务枚举
  *
- * @author: Dao-yang.
- * @date: Created in 2024/1/18 10:43
+ * @author: BUPT Chatroom Teams(Du/Fu/Lu/Wu/Kang).
+ * @date: Created in 2025/6/20 10:43
  */
 public enum NotifyBizEm {
     BIZ_ORDER(9000001, "订单业务"),// 企业订单业务
