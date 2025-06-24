@@ -1,358 +1,439 @@
-# 星星点点聊天室项目
+# 网络聊天室系统 (DotChat)
 
 ## 项目简介
-基于Java Spring Boot + WebSocket的即时通讯系统，支持单聊、群聊、小组聊天等功能。
 
-## 项目架构
-- **dot-chat-server**: 聊天服务器 (端口8089, WebSocket端口9326)
-- **dot-chat-admin**: 管理后台 (端口9089)
-- **dot-chat-web**: 前端用户界面
-- **nginx**: 反向代理服务器 (端口80)
-- **common-util**: 公共工具类
+DotChat是一个基于Java的企业级网络聊天室系统，提供实时消息传输、多媒体文件分享、语音视频通话等功能。系统采用前后端分离的架构设计，使用Spring Boot + WebSocket + TIO框架实现高并发的消息传输，支持私聊、群聊、文件传输、群内小组等多种交互方式。
 
-## 快速启动
+## 技术栈
 
-### 1. 数据库准备
-- MySQL (端口3306)
-- Redis (端口6379)
+### 后端技术
+- **核心框架**: Spring Boot 2.7.18
+- **消息传输**: TIO框架 + WebSocket
+- **数据库**: MySQL 8.0
+- **ORM框架**: MyBatis
+- **连接池**: HikariCP
+- **日志框架**: Logback
+- **构建工具**: Maven
 
-### 2. 启动后端服务
-```bash
-# 启动聊天服务器
-cd dot-chat-server
-java -jar target/dot-chat-server.jar
+### 前端技术
+- **UI框架**: HTML5 + CSS3 + JavaScript (ES6+)
+- **实时通信**: WebSocket API
+- **多媒体**: WebRTC (音视频通话)
+- **文件上传**: HTML5 File API
+- **界面交互**: jQuery
 
-# 启动管理后台
-cd dot-chat-admin  
-java -jar target/dot-chat-admin.jar
+### 部署环境
+- **Web服务器**: Nginx 1.28.0
+- **应用服务器**: 内嵌Tomcat
+- **反向代理**: Nginx反向代理
+- **内网穿透**: NATAPP (开发环境)
+
+## 系统架构
+
+### 整体架构图
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│     前端Web     │    │     Nginx       │    │   Spring Boot   │
+│   (HTML/JS)     │◄──►│   反向代理       │◄──►│    后端服务     │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                                       │
+                                                       ▼
+                       ┌─────────────────┐    ┌─────────────────┐
+                       │   TIO框架       │    │     MySQL       │
+                       │  WebSocket      │    │     数据库      │
+                       └─────────────────┘    └─────────────────┘
 ```
 
-### 3. 启动nginx
-```bash
-cd nginx-1.28.0
-./nginx.exe
+### 技术架构分层
+1. **表现层**: Web前端界面，负责用户交互和数据展示
+2. **应用层**: Spring Boot应用服务，处理业务逻辑
+3. **通信层**: TIO + WebSocket，实现实时消息传输
+4. **数据层**: MySQL数据库，持久化存储用户和消息数据
+
+### 核心组件架构
+基于系统类图设计，系统包含以下核心组件：
+
+#### 用户管理组件
+- **用户实体**: 管理用户基本信息、在线状态、聊天窗口限制(最多5个)
+- **用户管理器**: 维护在线用户列表，处理用户状态广播
+- **会话管理器**: 支持多设备登录和漫游功能
+
+#### 通信组件
+- **聊天会话**: 抽象基类，统一处理私聊和群聊的共同功能
+- **私聊会话**: 一对一聊天会话管理
+- **群聊会话**: 多人群组聊天，支持群主和管理员权限管理
+- **消息处理**: 支持文本、文件、图片、系统通知等多种消息类型
+
+#### 服务端组件
+- **聊天服务器**: 管理WebSocket连接，处理消息广播和客户端连接
+- **客户端处理器**: 为每个客户端分配独立的处理器，管理消息收发
+- **文件传输**: 支持文件上传下载和断点续传功能
+
+## 核心功能
+
+### 1. 用户管理
+- **用户注册/登录**: 支持账号密码登录验证
+- **在线状态管理**: 实时维护用户在线状态，支持状态广播
+- **用户信息管理**: 昵称、头像等个人信息设置
+- **多设备登录**: 支持用户漫游登录，新设备登录时强制旧设备下线
+
+### 2. 即时通讯
+- **私聊功能**: 一对一实时消息传输
+- **群聊功能**: 多人群组聊天，支持群主和管理员管理
+- **消息类型**: 支持文本、图片、文件、系统通知等多种消息格式
+- **消息历史**: 消息持久化存储与历史记录查询
+- **消息同步**: 新设备登录时自动同步历史消息和会话状态
+
+### 3. 多媒体通信
+- **文件传输**: 支持各种格式文件的上传下载
+- **图片分享**: 图片消息发送与预览，支持图片压缩和缩略图生成
+- **语音通话**: 基于WebRTC的实时语音通话，支持群组语音会议
+- **视频通话**: 基于WebRTC的实时视频通话
+
+### 4. 群组管理
+- **群组创建**: 用户可创建聊天群组，设置群主和管理员
+- **成员管理**: 群主和管理员权限管理，支持添加/移除成员
+- **群内小组**: 支持群内创建子小组进行独立聊天
+- **并发约束**: 实现"一人一组"约束，确保用户同时只能参与一个小组
+- **群组解散**: 群主可解散群组，支持群组状态管理
+
+### 5. 系统特性
+- **心跳机制**: 定时心跳包维护连接稳定性
+- **异常处理**: 完善的异常捕获和处理机制
+- **日志记录**: 分级日志记录，便于问题追踪和系统监控
+- **负载均衡**: Nginx反向代理支持高并发访问
+- **界面管理**: 统一管理所有聊天窗口，处理界面更新和用户交互
+
+## 项目结构
+
+```
+chatroom/
+├── common-util/              # 公共工具模块
+│   ├── src/main/java/       # Java源码
+│   └── pom.xml              # Maven配置
+├── dot-chat-server/         # 后端服务模块
+│   ├── src/main/java/       # Java源码
+│   │   └── com/dot/msg/chat/
+│   │       ├── tio/         # TIO框架相关
+│   │       ├── controller/  # 控制器
+│   │       ├── service/     # 业务逻辑
+│   │       └── model/       # 数据模型
+│   ├── src/main/resources/  # 配置文件
+│   │   └── application.yml  # 应用配置
+│   ├── sql/                 # 数据库脚本
+│   │   ├── 聊天室MySQL表结构.sql
+│   │   ├── 群内小组功能.sql
+│   │   └── 初始化小组聊天表.sql
+│   └── pom.xml              # Maven配置
+├── dot-chat-web/            # 前端Web模块
+│   ├── src/main/webapp/     # Web资源
+│   │   ├── js/              # JavaScript文件
+│   │   ├── css/             # 样式文件
+│   │   └── *.html           # HTML页面
+│   └── pom.xml              # Maven配置
+├── docs/                    # 项目设计文档
+│   ├── class-diagram-cn.puml    # 中文类图 - 系统核心组件设计
+│   ├── sequence-diagram.puml    # 时序图 - 登录和消息发送流程
+│   ├── data-model-diagram.puml  # 数据模型图 - 数据库表关系
+│   ├── activity-diagram.puml    # 活动图 - 群聊消息处理流程
+│   ├── roaming-login-sequence.puml  # 用户漫游登录时序图
+│   ├── send-image-sequence.puml     # 图片发送时序图
+│   └── voice-call-sequence.puml     # 群聊语音通话时序图
+├── nginx-1.28.0/            # Nginx配置
+└── logs/                    # 日志文件
 ```
 
-### 4. 访问地址
-- 用户聊天界面: http://localhost/
-- 管理后台: http://localhost/admin/
+## 数据库设计
 
-## 常见问题解决
+### 核心数据表
+基于数据模型设计图，系统包含以下核心数据实体：
 
-### Bean创建循环依赖错误
+1. **好友关系 (chat_friend)**
+   - 用户ID、好友ID、备注、是否置顶
+   - 标签、首字母、来源、创建/更新时间
 
-**问题现象**: 启动时出现`BeanCreationException`错误，提示`Error creating bean with name 'chatFriendApplyController': Injection of resource dependencies failed`
+2. **好友申请 (chat_friend_apply)**
+   - 申请用户ID、好友ID、状态、来源
+   - 申请理由、申请回复、创建/更新时间
 
-**错误信息示例**:
-```
-Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'chatFriendApplyServiceImpl': Injection of resource dependencies failed
-...
-Relying upon circular references is discouraged and they are prohibited by default. Update your application to remove the dependency cycle between beans.
-```
+3. **群组信息 (chat_group)**
+   - 群名称、群头像、成员数量、群主ID
+   - 管理员列表、群公告、是否解散、解散时间
 
-**问题原因**: Spring Boot 2.6+版本默认禁止循环引用，而项目中的Service层存在循环依赖
+4. **申请用户关联 (chat_friend_apply_user_rel)**
+   - 申请ID、用户ID、好友ID、备注
+   - 标签、未读数、创建/更新时间
 
-**解决方案**:
-1. **配置允许循环引用** - 在`application.yml`中添加：
-```yaml
-spring:
-  main:
-    allow-circular-references: true
-```
+5. **群内小组 (chat_group_small)**
+   - 支持群内创建子小组功能
+   - 实现"一人一组"约束机制
 
-2. **添加TransactionTemplate Bean配置** - 在`CommBeanConfig.java`中添加：
-```java
-@Bean
-public TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
-    return new TransactionTemplate(transactionManager);
-}
-```
+### 表关系说明
+- 好友关系表与好友申请表通过用户ID关联
+- 群组信息表管理群组基本信息和成员关系
+- 申请用户关联表处理好友申请的复杂关联关系
+- 小组表实现群内独立子群功能
 
-3. **使用@Lazy注解解决循环依赖** - 在有循环依赖的地方使用：
-```java
-@Resource
-@Lazy
-private ChatSubgroupService chatSubgroupService;
-```
+详细表结构请参考 `dot-chat-server/sql/` 目录下的SQL文件。
 
-### 登录502错误问题
+## 业务流程设计
 
-**问题现象**: 点击登录按钮后无响应，浏览器控制台出现502 (Bad Gateway)错误
+### 1. 用户登录流程
+基于登录时序图设计：
+1. 用户输入账号密码
+2. 客户端发送登录请求
+3. 服务器验证用户信息
+4. 更新用户在线状态
+5. 返回登录结果并加载主界面
 
-**问题原因**: Spring Boot静态资源处理器配置错误，使用`/**`匹配所有路径导致API请求被错误处理
+### 2. 消息发送流程
+标准消息发送包含以下步骤：
+1. 用户输入消息内容
+2. 创建消息对象并发送到服务器
+3. 服务器检查用户在线状态
+4. 转发消息给接收方(在线/离线处理)
+5. 保存消息到数据库并返回发送结果
 
-**解决方案**: 
-1. 修改`dot-chat-server/src/main/java/com/dot/comm/config/WebConfig.java`
-2. 修改`dot-chat-admin/src/main/java/com/dot/comm/config/WebConfig.java`
+### 3. 群聊消息处理流程
+基于活动图设计的复杂业务流程：
+1. **消息类型判断**: 区分文本消息和文件消息
+2. **文件处理**: 对于文件消息，先进行文件上传和验证
+3. **权限验证**: 并发验证发送者权限、检查群成员列表
+4. **消息广播**: 获取在线群成员并并发广播消息
+5. **持久化存储**: 异步保存消息到数据库并更新界面
 
-将以下配置：
-```java
-@Override
-public void addResourceHandlers(ResourceHandlerRegistry registry) {
-    registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
-    // ...
-}
-```
+### 4. 图片消息处理
+基于图片发送时序图的完整流程：
+1. **图片预处理**: 自动压缩图片和生成缩略图
+2. **文件上传**: 上传到文件服务器并获取URL
+3. **消息发送**: 创建包含图片URL的消息对象
+4. **实时推送**: 推送给在线用户
+5. **按需下载**: 接收方按需下载图片数据
 
-修改为：
-```java
-@Override
-public void addResourceHandlers(ResourceHandlerRegistry registry) {
-    // 只处理静态资源，不拦截API请求
-    registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
-    registry.addResourceHandler("/favicon.ico").addResourceLocations("classpath:/static/");
-    registry.addResourceHandler("/ico/**").addResourceLocations("classpath:/static/ico/");
-    registry.addResourceHandler("doc.html").addResourceLocations("classpath:/META-INF/resources/");
-    registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
-}
-```
+### 5. 用户漫游登录
+基于漫游登录时序图的多设备管理：
+1. **新设备登录**: 用户在新设备输入账号密码
+2. **设备检测**: 服务器检查是否存在其他在线设备
+3. **强制下线**: 向其他设备发送强制下线通知
+4. **会话创建**: 为新设备创建会话
+5. **消息同步**: 自动同步历史消息和会话状态
 
-**修复后需要**:
-1. 重新编译并启动两个后端服务
-2. 确认端口监听状态：
-   - 8089端口：聊天服务器
-   - 9089端口：管理后台
-   - 9326端口：WebSocket服务
+### 6. 群组语音通话
+基于语音通话时序图的群组通话流程：
+1. **发起通话**: 用户点击语音通话按钮
+2. **设备初始化**: 初始化音频设备
+3. **成员邀请**: 向群成员广播语音通话邀请
+4. **响应处理**: 处理成员接受/拒绝/超时响应
+5. **连接建立**: 创建语音房间并建立P2P连接
 
-### 登录API地址配置问题
+## 部署说明
 
-**问题现象**: 前端登录时出现502错误，API请求失败
+### 环境要求
+- JDK 1.8+
+- MySQL 8.0+
+- Maven 3.6+
+- Nginx 1.20+
 
-**问题原因**: 前端JavaScript中的API地址配置与实际服务端口不匹配
+### 部署步骤
 
-**解决方案**: 
-通过Nginx反向代理实现 `http://localhost` 访问：
-
-1. **恢复前端配置** - 将 `dot-chat-web/src/main/webapp/js/base.js` 中的HOST改回：
-```javascript
-HOST = "localhost";  // 不带端口号
-BASE_URL = "http://" + HOST + "/";
-```
-
-2. **启动Nginx** - 使用已配置好的nginx.conf：
-```bash
-cd nginx-1.28.0
-.\nginx.exe
-```
-
-3. **启动后端服务**：
-```bash
-# 聊天服务器 (端口8089)
-cd dot-chat-server
-mvn spring-boot:run
-
-# 管理后台 (端口9089) - 可选
-cd dot-chat-admin  
-mvn spring-boot:run
-```
-
-**Nginx代理配置说明**:
-- `http://localhost/` → 用户聊天界面
-- `http://localhost/admin/` → 管理后台界面  
-- `http://localhost/api/sys/` → 管理后台API (代理到9089端口)
-- `http://localhost/api/` → 聊天API (代理到8089端口)
-- WebSocket连接代理到9326端口
-
-### 端口检查命令
-```bash
-# Windows PowerShell
-netstat -an | Select-String "LISTENING" | Select-String ":80|:8089|:9326"
-
-# 检查Java进程
-Get-Process -Name "java" -ErrorAction SilentlyContinue
-```
-
-**最终访问地址**: `http://localhost` (使用账号 `18805250558`，密码 `666666`)
-
-### 小组聊天问题修复
-
-#### 1. "未知用户"显示问题修复
-
-**问题现象**: 小组聊天中发送者显示为"未知用户"
-
-**问题原因**: 
-1. SQL查询中的字段别名使用下划线命名（`sender_nickname`），但Java实体类使用驼峰命名（`senderNickname`）
-2. MyBatis字段映射配置不一致
-
-**解决方案**:
-1. **修改SQL查询别名** - 在 `ChatSubgroupMsgDao.java` 中统一使用驼峰命名：
+#### 1. 数据库初始化
 ```sql
-SELECT msg.*, u.nickname as senderNickname, u.avatar as senderAvatar 
-FROM chat_subgroup_msg msg 
-LEFT JOIN chat_user u ON msg.send_user_id = u.id
+-- 执行数据库脚本
+source dot-chat-server/sql/聊天室MySQL表结构.sql;
+source dot-chat-server/sql/群内小组功能.sql;
+source dot-chat-server/sql/初始化小组聊天表.sql;
 ```
 
-2. **确保MyBatis配置** - 在 `application.yml` 中已配置：
+#### 2. 配置修改
+编辑 `dot-chat-server/src/main/resources/application.yml`:
 ```yaml
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
+server:
+  port: 9326
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/your_database?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: your_username
+    password: your_password
 ```
 
-3. **前端兜底处理** - 如果后端没有返回昵称，从本地群成员列表获取：
-```javascript
-if (!senderName && !isOwn) {
-    let groupMemberList = getLocalGroupMemberList();
-    if (groupMemberList) {
-        let sender = groupMemberList.find(member => member.userId === msg.sendUserId);
-        if (sender) {
-            senderName = sender.nickname;
-        }
+#### 3. 编译打包
+```bash
+# 编译整个项目
+mvn clean package
+
+# 编译后端服务
+cd dot-chat-server
+mvn clean package
+
+# 编译前端Web
+cd dot-chat-web
+mvn clean package
+```
+
+#### 4. 启动服务
+
+**开发环境启动**:
+```bash
+cd dot-chat-server/bin/dev
+./start.sh    # Linux/Mac
+start.bat     # Windows
+```
+
+**生产环境启动**:
+```bash
+cd dot-chat-server/bin/prod
+./start.sh    # Linux/Mac
+start.bat     # Windows
+```
+
+#### 5. Nginx配置
+参考 `nginx-1.28.0/conf/nginx.conf` 进行反向代理配置:
+```nginx
+upstream backend {
+    server 127.0.0.1:9326;
+}
+
+server {
+    listen 80;
+    server_name your_domain.com;
+    
+    location / {
+        proxy_pass http://backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
 
-#### 2. 小组聊天窗口工具栏图标问题修复
+## 关键技术实现
 
-**问题现象**: 小组聊天窗口底部意外显示表情、照片、文件图标
+### 1. TIO框架集成
+- **配置类**: `JRTioConfig.java` - TIO框架配置
+- **启动类**: `JRWebsocketStarter.java` - WebSocket服务启动
+- **消息处理**: `JRWsMsgHandler.java` - 消息处理逻辑
 
-**问题原因**: 
-1. 存在冲突的 `subgroup-chat.js` 文件，可能包含旧版本的小组聊天实现
-2. CSS样式冲突或JavaScript代码冲突
+### 2. 心跳机制
+系统实现了完善的心跳机制来维护连接稳定性:
+- 客户端每30秒发送心跳包
+- 服务端监控连接状态，超时自动断开
+- 支持重连机制确保服务可用性
 
-**解决方案**:
-1. **删除冲突文件** - 移除 `dot-chat-web/src/main/webapp/js/subgroup-chat.js`
-2. **提高小组聊天窗口层级** - 修改CSS：
-```css
-.subgroup-chat-window {
-    z-index: 9999; /* 原来是1000 */
-    overflow: hidden; /* 防止内容溢出 */
-}
-```
+### 3. WebRTC音视频
+- **音频通话**: 基于WebRTC实现实时音频传输
+- **视频通话**: 支持高清视频通话功能
+- **信令服务**: 通过WebSocket传输信令消息
+- **群组通话**: 支持多人语音会议功能
 
-3. **确保功能纯净** - 小组聊天窗口仅支持文本消息，不包含表情、图片、文件功能
+### 4. 群内小组功能
+- **动态创建**: 群成员可在群内创建小组
+- **并发约束**: 实现"一人一组"约束机制
+- **独立聊天**: 小组内独立的消息传输
 
-#### 3. 小组邀请接受/拒绝功能重写
+## 系统设计文档
 
-**问题现象**: 接受或拒绝小组邀请时经常出现"系统异常"错误
+项目docs文件夹包含了完整的UML设计文档，详细描述了系统的各个方面：
 
-**问题原因**: 
-1. 事务处理不当，可能存在数据库锁等待或死锁
-2. 并发访问时数据一致性检查失败
-3. 异常处理不完整，没有区分业务异常和系统异常
-4. 缺少重复操作的幂等性处理
+### 1. 类图设计 (class-diagram-cn.puml)
+- **用户管理类**: 用户实体、用户管理器，包含用户信息管理和在线状态维护
+- **聊天核心类**: 聊天会话抽象类，私聊会话、群聊会话的具体实现
+- **消息系统类**: 消息实体、消息类型枚举、消息存储器的完整设计
+- **界面组件类**: 聊天窗口、图形界面管理器，统一管理所有聊天窗口
+- **服务端类**: 聊天服务器、客户端处理器的架构设计
 
-**解决方案**:
-1. **完善参数验证** - 在控制器和服务层都进行参数校验：
-```java
-// 控制器层
-if (inviteId == null) {
-    log.warn("【控制器-接受小组邀请】参数错误: inviteId为空");
-    return ResultBean.validateFailed("邀请ID不能为空");
-}
+### 2. 时序图设计
+- **基础时序图** (sequence-diagram.puml): 用户登录和消息发送的标准流程
+- **漫游登录** (roaming-login-sequence.puml): 多设备登录管理、强制下线、消息同步
+- **图片发送** (send-image-sequence.puml): 图片压缩、上传、推送的完整流程
+- **语音通话** (voice-call-sequence.puml): 群组语音通话的建立、管理和P2P连接
 
-// 服务层
-if (inviteId == null || userId == null) {
-    log.error("【接受小组邀请】参数错误: inviteId={}, userId={}", inviteId, userId);
-    throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "参数不能为空");
-}
-```
+### 3. 活动图设计 (activity-diagram.puml)
+群聊消息处理的完整业务流程：
+- 消息类型识别和分类处理
+- 文件上传和验证机制
+- 并发权限验证和群成员检查
+- 消息广播和持久化存储的并行处理
 
-2. **增强业务逻辑验证** - 详细检查每个业务条件：
-```java
-// 检查邀请是否存在
-if (invite == null) {
-    log.error("【接受小组邀请】邀请不存在: inviteId={}", inviteId);
-    throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "邀请不存在");
-}
+### 4. 数据模型设计 (data-model-diagram.puml)
+核心数据实体和关系设计：
+- **好友关系**: 好友关系表、好友申请表的设计
+- **群组管理**: 群组信息表和成员关系的维护
+- **申请管理**: 申请用户关联表处理复杂的申请流程
 
-// 检查邀请归属
-if (!invite.getInviteeId().equals(userId)) {
-    log.error("【接受小组邀请】邀请不属于当前用户: inviteId={}, userId={}, inviteeId={}", 
-        inviteId, userId, invite.getInviteeId());
-    throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "邀请不属于您");
-}
-```
+这些设计文档为系统开发提供了完整的架构指导，确保了系统的可扩展性和维护性。
 
-3. **实现幂等性处理** - 防止重复操作：
-```java
-// 检查用户是否已经是小组成员（防止重复加入）
-if (isSubgroupMember(invite.getSubgroupId(), userId)) {
-    log.warn("【接受小组邀请】用户已是小组成员: userId={}, subgroupId={}", userId, invite.getSubgroupId());
-    // 更新邀请状态为已接受
-    invite.setStatus(1);
-    invite.setHandleTime(DateUtil.now());
-    chatSubgroupInviteDao.updateById(invite);
-    return true;
-}
-```
+## 开发文档
 
-4. **优化异常处理** - 区分业务异常和系统异常：
-```java
-} catch (ApiException e) {
-    // 业务异常，返回具体错误信息
-    log.warn("【控制器-接受小组邀请】业务异常: inviteId={}, error={}", inviteId, e.getMessage());
-    return ResultBean.failed(e.getMessage());
-} catch (Exception e) {
-    // 系统异常，返回通用错误信息
-    log.error("【控制器-接受小组邀请】系统异常: inviteId={}, error={}", inviteId, e.getMessage(), e);
-    return ResultBean.failed("系统繁忙，请稍后重试");
-}
-```
+除了设计文档外，项目还提供了详细的开发文档，位于项目根目录:
 
-5. **完善日志记录** - 添加详细的操作日志，便于问题排查：
-```java
-log.info("【接受小组邀请】开始执行加入操作: userId={}, subgroupId={}", userId, invite.getSubgroupId());
-log.info("【接受小组邀请】用户成功加入小组: userId={}, subgroupId={}, memberId={}", 
-    userId, invite.getSubgroupId(), member.getId());
-log.info("【接受小组邀请】成功完成: userId={}, subgroupId={}, inviteId={}", 
-    userId, invite.getSubgroupId(), inviteId);
-```
+1. **项目报告.md** - 完整的项目分析报告，包含技术架构和功能实现
+2. **功能实现说明.md** - 各功能模块的实现细节和代码引用
+3. **心跳包机制详解.md** - 心跳机制的技术实现和代码分析
+4. **TIO框架详解.md** - TIO框架的使用说明和集成方式
 
-**重写后的改进**:
-- ✅ 消除了大部分"系统异常"错误
-- ✅ 支持重复操作的幂等性处理
-- ✅ 提供更清晰的错误提示信息
-- ✅ 增强了并发安全性
-- ✅ 完善了操作日志，便于问题排查
+## 测试说明
 
-## 功能特性
-- ✅ 用户注册登录
-- ✅ 单聊/群聊
-- ✅ 文件传输
-- ✅ 语音/视频通话
-- ✅ 群内小组聊天
-- ✅ 消息推送
-- ✅ 管理后台
+### 功能测试
+1. **用户登录测试**: 验证用户认证流程和漫游登录机制
+2. **消息传输测试**: 测试各种消息类型的收发和持久化
+3. **文件传输测试**: 验证文件上传下载功能和图片处理流程
+4. **多用户并发测试**: 测试系统高并发处理能力
+5. **群组功能测试**: 测试群聊、小组创建、权限管理等功能
+6. **设备漫游测试**: 测试多设备登录、强制下线、消息同步
+7. **语音通话测试**: 测试群组语音会议的建立和管理
 
-## 小组聊天功能说明
+### 性能测试
+- **连接数测试**: 支持1000+并发WebSocket连接
+- **消息吞吐量**: 高频消息传输性能和并发处理
+- **文件传输速度**: 大文件传输效率和断点续传
+- **数据库性能**: 消息存储和查询的性能优化
 
-### 业务规则
-1. **一人一组原则**: 每个群成员只能参加一个小组
-2. **最小组建规模**: 创建小组时至少选择1个成员，加上创建者就是2人小组
-3. **组长权限**: 
-   - 小组创建者自动成为组长
-   - 组长可以解散小组
-   - 组长不能退出小组（只能解散）
-4. **成员权限**:
-   - 普通成员可以退出小组
-   - 成员退出后可以加入其他小组
+## 常见问题
 
-### 创建流程
-1. 群成员点击"创建小组"
-2. 输入小组名称（2-20个字符）
-3. 至少选择1个群成员进行邀请
-4. 系统自动将创建者加入小组
-5. 向被邀请成员发送小组邀请
-6. 被邀请成员接受邀请后，小组正式成立
+### Q1: 启动时端口冲突怎么办？
+A: 修改 `application.yml` 中的 `server.port` 配置，同时更新Nginx反向代理配置。
 
-### 界面优化
-- 使用微信绿色主题（#07c160）替代原有蓝色
-- 组长显示特殊标识"(组长)"
-- 组长和普通成员显示不同的操作按钮
-- 小组聊天窗口仅支持文本消息，不支持表情、图片、文件
-- 添加友好的提示信息
-- 点击"小组聊天"直接进入"我的小组"界面，简化操作流程
+### Q2: 数据库连接失败？
+A: 检查 `application.yml` 中的数据库配置，确保MySQL服务正常运行，验证用户权限。
 
-## 技术栈
-- **后端**: Spring Boot, MyBatis Plus, TIO WebSocket
-- **前端**: jQuery, HTML5, CSS3
-- **数据库**: MySQL, Redis
-- **代理**: Nginx
+### Q3: WebSocket连接异常？
+A: 检查防火墙设置，确保WebSocket端口可访问，查看TIO框架日志排查问题。
 
-## 开发者
-- 作者: 吴安然
-- 联系方式: 请通过项目Issues联系
+### Q4: 群组语音通话无法建立？
+A: 检查WebRTC配置，确保浏览器支持音频设备访问权限，查看网络连接状态和信令服务。
+
+### Q5: 图片上传失败？
+A: 检查文件服务器配置，确认文件大小限制，验证图片格式支持和压缩功能。
+
+### Q6: 用户漫游登录后消息未同步？
+A: 检查消息同步器配置，确认数据库中历史消息完整性，查看同步日志和会话状态。
+
+### Q7: 群内小组功能异常？
+A: 验证"一人一组"约束机制，检查小组表数据一致性，确认并发控制逻辑。
+
+## 贡献指南
+
+1. Fork 本项目
+2. 创建功能分支 (`git checkout -b feature/新功能`)
+3. 提交更改 (`git commit -am '添加新功能'`)
+4. 推送到分支 (`git push origin feature/新功能`)
+5. 创建 Pull Request
 
 ## 许可证
-Apache License 2.0 
+
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+
+## 联系方式
+
+如有问题或建议，请通过以下方式联系:
+- 项目Issue: 在GitHub仓库中提交Issue
+- 技术讨论: 欢迎参与项目技术讨论
+
+---
+
+**注意**: 本项目仅供学习和研究使用，如需商业使用请联系开发者获得授权。
