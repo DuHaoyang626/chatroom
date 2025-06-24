@@ -14,10 +14,12 @@ import com.dot.msg.chat.dao.ChatSubgroupDao;
 import com.dot.msg.chat.dao.ChatSubgroupInviteDao;
 import com.dot.msg.chat.dao.ChatSubgroupMemberDao;
 import com.dot.msg.chat.dao.ChatSubgroupMsgDao;
+import com.dot.msg.chat.dao.ChatUserDao;
 import com.dot.msg.chat.model.ChatSubgroup;
 import com.dot.msg.chat.model.ChatSubgroupInvite;
 import com.dot.msg.chat.model.ChatSubgroupMember;
 import com.dot.msg.chat.model.ChatSubgroupMsg;
+import com.dot.msg.chat.model.ChatUser;
 import com.dot.msg.chat.service.ChatGroupMemberService;
 import com.dot.msg.chat.service.ChatSubgroupService;
 import com.dot.msg.chat.service.ChatMsgService;
@@ -30,6 +32,7 @@ import org.springframework.context.annotation.Lazy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 群内小组服务实现
@@ -56,6 +59,9 @@ public class ChatSubgroupServiceImpl extends ServiceImpl<ChatSubgroupDao, ChatSu
     @Resource
     private ChatGroupMemberService chatGroupMemberService;
     
+    @Resource
+    private ChatUserDao chatUserDao;
+
     @Resource
     @Lazy
     private ChatMsgService chatMsgService;
@@ -172,186 +178,145 @@ public class ChatSubgroupServiceImpl extends ServiceImpl<ChatSubgroupDao, ChatSu
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean acceptSubgroupInvite(Integer inviteId, Integer userId) {
-        log.info("接受小组邀请: inviteId={}, userId={}", inviteId, userId);
-        
-        // 1. 获取邀请信息
+        log.info("【接受邀请】V2 - 开始: inviteId={}, userId={}", inviteId, userId);
+
+        // 1. 获取并校验邀请
         ChatSubgroupInvite invite = chatSubgroupInviteDao.selectById(inviteId);
         if (invite == null || !invite.getInviteeId().equals(userId)) {
             throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "邀请不存在或不属于您");
         }
-
         if (invite.getStatus() != 0) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "邀请已处理");
+            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "邀请已被处理，请勿重复操作");
         }
 
-        // 2. 检查用户是否可以加入小组（关键约束：不能同时加入多个小组）
-        if (!canJoinSubgroup(userId, invite.getParentGroupId())) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "您已在其他小组中，无法加入新小组");
-        }
-
-        // 3. 检查小组是否仍然活跃
+        // 2. 检查小组和群组状态
         ChatSubgroup subgroup = this.getById(invite.getSubgroupId());
         if (subgroup == null || !subgroup.getIsActive()) {
             throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "小组不存在或已解散");
         }
 
-        try {
-            // 4. 将用户加入小组
-            ChatSubgroupMember member = new ChatSubgroupMember();
-            member.setSubgroupId(invite.getSubgroupId());
-            member.setUserId(userId);
-            member.setParentGroupId(invite.getParentGroupId());
-            member.setStatus(1);
-            member.setJoinTime(DateUtil.now());
-            
-            boolean memberSaved = chatSubgroupMemberDao.insert(member) > 0;
-            if (!memberSaved) {
-                throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "加入小组失败");
-            }
-
-            // 5. 更新邀请状态
-            invite.setStatus(1); // 已接受
-            invite.setHandleTime(DateUtil.now());
-            boolean inviteUpdated = chatSubgroupInviteDao.updateById(invite) > 0;
-            if (!inviteUpdated) {
-                throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "更新邀请状态失败");
-            }
-
-            // 6. 更新小组成员数量
-            chatSubgroupDao.updateMemberCount(invite.getSubgroupId());
-
-            log.info("用户成功加入小组: userId={}, subgroupId={}", userId, invite.getSubgroupId());
-            return true;
-            
-        } catch (Exception e) {
-            log.error("接受小组邀请失败: inviteId={}, userId={}, error={}", inviteId, userId, e.getMessage());
-            throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "接受邀请失败，可能您已在其他小组中");
+        // 3. 检查用户是否已在其他小组
+        if (!canJoinSubgroup(userId, invite.getParentGroupId())) {
+            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "您已加入该群的其他小组，无法再加入");
         }
+        
+        // 4. 更新邀请状态为"已接受" (使用自定义的、可靠的更新方法)
+        Integer updatedRows = chatSubgroupInviteDao.updateInviteStatus(inviteId, userId, 1, DateUtil.now());
+        if (updatedRows == null || updatedRows <= 0) {
+             log.warn("【接受邀请】V2 - 更新邀请状态失败，可能已被并发处理: inviteId={}", inviteId);
+            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "操作失败，邀请可能已被处理");
+        }
+
+        // 5. 将用户加入小组成员表
+        ChatSubgroupMember member = new ChatSubgroupMember();
+        member.setSubgroupId(invite.getSubgroupId());
+        member.setUserId(userId);
+        member.setParentGroupId(invite.getParentGroupId());
+        member.setStatus(1); // 活跃成员
+        member.setJoinTime(DateUtil.now());
+        if (chatSubgroupMemberDao.insert(member) <= 0) {
+            log.error("【接受邀请】V2 - 插入成员记录失败: subgroupId={}, userId={}", invite.getSubgroupId(), userId);
+            throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "加入小组失败，请稍后重试");
+        }
+
+        // 6. 更新小组的成员计数
+        chatSubgroupDao.incrementMemberCount(invite.getSubgroupId());
+
+        log.info("【接受邀请】V2 - 成功: userId={} 加入了 subgroupId={}", userId, invite.getSubgroupId());
+        return true;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean rejectSubgroupInvite(Integer inviteId, Integer userId) {
-        log.info("拒绝小组邀请: inviteId={}, userId={}", inviteId, userId);
-        
+        log.info("【拒绝邀请】V2 - 开始: inviteId={}, userId={}", inviteId, userId);
+
+        // 1. 获取并校验邀请
         ChatSubgroupInvite invite = chatSubgroupInviteDao.selectById(inviteId);
         if (invite == null || !invite.getInviteeId().equals(userId)) {
             throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "邀请不存在或不属于您");
         }
-
         if (invite.getStatus() != 0) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "邀请已处理");
+            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "邀请已被处理，请勿重复操作");
         }
 
-        invite.setStatus(2); // 已拒绝
-        invite.setHandleTime(DateUtil.now());
-        boolean updated = chatSubgroupInviteDao.updateById(invite) > 0;
-        
-        if (!updated) {
-            throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "拒绝邀请失败");
+        // 2. 更新邀请状态为"已拒绝"
+        Integer updatedRows = chatSubgroupInviteDao.updateInviteStatus(inviteId, userId, 2, DateUtil.now());
+        if (updatedRows == null || updatedRows <= 0) {
+            log.warn("【拒绝邀请】V2 - 更新邀请状态失败，可能已被并发处理: inviteId={}", inviteId);
+            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "操作失败，邀请可能已被处理");
         }
 
-        log.info("用户拒绝小组邀请: userId={}, subgroupId={}", userId, invite.getSubgroupId());
+        log.info("【拒绝邀请】V2 - 成功: userId={} 拒绝了来自 subgroupId={} 的邀请", userId, invite.getSubgroupId());
         return true;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean leaveSubgroup(Integer subgroupId, Integer userId) {
-        log.info("退出小组: subgroupId={}, userId={}", subgroupId, userId);
-        
-        // 检查用户是否是小组成员
-        ChatSubgroupMember member = chatSubgroupMemberDao.selectOne(
-            Wrappers.<ChatSubgroupMember>lambdaQuery()
-                .eq(ChatSubgroupMember::getSubgroupId, subgroupId)
-                .eq(ChatSubgroupMember::getUserId, userId)
-                .eq(ChatSubgroupMember::getStatus, 1)
-        );
+        log.info("【退出小组】V2 - 开始: subgroupId={}, userId={}", subgroupId, userId);
 
-        if (member == null) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "您不是小组成员");
-        }
-
-        // 检查是否是小组组长（创建者）
+        // 1. 校验小组和成员是否存在
         ChatSubgroup subgroup = this.getById(subgroupId);
         if (subgroup == null) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "小组不存在");
-        }
-        
-        if (subgroup.getCreatorId().equals(userId)) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "小组组长不能退出小组，请先解散小组或转让组长");
+            log.warn("【退出小组】V2 - 小组不存在，视为退出成功: subgroupId={}", subgroupId);
+            return true;
         }
 
-        // 将用户状态设为已退出
-        member.setStatus(0);
-        boolean updated = chatSubgroupMemberDao.updateById(member) > 0;
-        
-        if (!updated) {
-            throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "退出小组失败");
+        ChatSubgroupMember member = chatSubgroupMemberDao.getMemberInfo(subgroupId, userId);
+        if (member == null) {
+            log.warn("【退出小组】V2 - 用户并非小组成员，视为退出成功: subgroupId={}, userId={}", subgroupId, userId);
+            return true;
         }
 
-        // 更新小组成员数量
-        chatSubgroupDao.updateMemberCount(subgroupId);
+        // 2. 判断退出者身份
+        boolean isCreator = userId.equals(subgroup.getCreatorId());
 
-        // 检查小组是否还有其他成员，如果没有则解散小组
-        List<Integer> remainingMembers = getSubgroupMemberIds(subgroupId);
-        if (CollUtil.isEmpty(remainingMembers)) {
-            subgroup.setIsActive(false);
-            this.updateById(subgroup);
-            log.info("小组已自动解散（无剩余成员）: subgroupId={}", subgroupId);
+        if (isCreator) {
+            // 如果是组长退出，则直接解散整个小组
+            log.info("【退出小组】V2 - 组长退出，执行解散操作: subgroupId={}, creatorId={}", subgroupId, userId);
+            return this.dissolveSubgroup(subgroupId, userId);
+        } else {
+            // 如果是普通成员退出
+            // a. 删除该成员的记录
+            if (chatSubgroupMemberDao.deleteById(member.getId()) <= 0) {
+                log.error("【退出小组】V2 - 删除成员记录失败: memberId={}", member.getId());
+                throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "退出小组失败");
+            }
+
+            // b. 更新小组成员数
+            chatSubgroupDao.decrementMemberCount(subgroup.getId());
+            log.info("【退出小组】V2 - 普通成员退出成功: subgroupId={}, userId={}", subgroupId, userId);
+            return true;
         }
-
-        log.info("用户成功退出小组: userId={}, subgroupId={}", userId, subgroupId);
-        return true;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean dissolveSubgroup(Integer subgroupId, Integer userId) {
-        log.info("解散小组: subgroupId={}, userId={}", subgroupId, userId);
-        
-        // 检查小组是否存在
+        log.info("【解散小组】V3 - 开始: subgroupId={}, operatorId={}", subgroupId, userId);
+
+        // 1. 校验小组是否存在
         ChatSubgroup subgroup = this.getById(subgroupId);
         if (subgroup == null) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "小组不存在");
-        }
-        
-        if (!subgroup.getIsActive()) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "小组已解散");
-        }
-        
-        // 检查是否是小组组长（创建者）
-        if (!subgroup.getCreatorId().equals(userId)) {
-            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "只有小组组长可以解散小组");
+            log.warn("【解散小组】V3 - 小组已不存在，操作成功: subgroupId={}", subgroupId);
+            return true;
         }
 
-        // 解散小组
-        subgroup.setIsActive(false);
-        subgroup.setUpdateTime(DateUtil.now());
-        boolean dissolved = this.updateById(subgroup);
-        
-        if (!dissolved) {
-            throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "解散小组失败");
+        // 2. 校验操作人是否为组长
+        if (!userId.equals(subgroup.getCreatorId())) {
+            throw new ApiException(ExceptionCodeEm.VALIDATE_FAILED, "只有组长才能解散小组");
         }
 
-        // 将所有成员状态设为已退出
-        chatSubgroupMemberDao.update(null, 
-            Wrappers.<ChatSubgroupMember>lambdaUpdate()
-                .eq(ChatSubgroupMember::getSubgroupId, subgroupId)
-                .eq(ChatSubgroupMember::getStatus, 1)
-                .set(ChatSubgroupMember::getStatus, 0)
-        );
-
-        // 将所有待处理的邀请设为已取消
-        chatSubgroupInviteDao.update(null,
-            Wrappers.<ChatSubgroupInvite>lambdaUpdate()
-                .eq(ChatSubgroupInvite::getSubgroupId, subgroupId)
-                .eq(ChatSubgroupInvite::getStatus, 0)
-                .set(ChatSubgroupInvite::getStatus, 3) // 3表示已取消
-        );
-
-        log.info("小组解散成功: subgroupId={}, creatorId={}", subgroupId, userId);
-        return true;
+        // 3. 直接从数据库中删除小组记录 (硬删除)
+        // 数据库的 ON DELETE CASCADE 会自动清理所有关联的成员、邀请和消息
+        if (this.removeById(subgroupId)) {
+            log.info("【解散小组】V3 - 成功: 小组及所有关联数据已被彻底删除, subgroupId={}", subgroupId);
+            return true;
+        } else {
+            log.error("【解散小组】V3 - 失败: 从数据库删除记录失败, subgroupId={}", subgroupId);
+            throw new ApiException(ExceptionCodeEm.SYSTEM_ERROR, "解散小组失败，请稍后重试");
+        }
     }
 
     @Override
@@ -431,7 +396,32 @@ public class ChatSubgroupServiceImpl extends ServiceImpl<ChatSubgroupDao, ChatSu
 
     @Override
     public List<ChatSubgroupInvite> getUserSubgroupInvites(Integer userId) {
-        return chatSubgroupInviteDao.getUserPendingInvites(userId);
+        // 直接调用DAO获取实体列表，MyBatis会自动完成映射
+        List<ChatSubgroupInvite> invites = chatSubgroupInviteDao.getUserPendingInvites(userId);
+
+        if (CollUtil.isEmpty(invites)) {
+            return new ArrayList<>();
+        }
+
+        // 循环填充关联的显示名称
+        for (ChatSubgroupInvite invite : invites) {
+            // 填充小组名称
+            ChatSubgroup subgroup = this.getById(invite.getSubgroupId());
+            if (subgroup != null) {
+                invite.setSubgroupName(subgroup.getName());
+            } else {
+                invite.setSubgroupName("未知小组");
+            }
+
+            // 填充邀请人昵称
+            ChatUser inviter = chatUserDao.selectById(invite.getInviterId());
+            if (inviter != null) {
+                invite.setInviterNickname(inviter.getNickname());
+            } else {
+                invite.setInviterNickname("未知用户");
+            }
+        }
+        return invites;
     }
 
     @Override
@@ -501,6 +491,8 @@ public class ChatSubgroupServiceImpl extends ServiceImpl<ChatSubgroupDao, ChatSu
         log.info("获取小组消息统计: subgroupId={}", subgroupId);
         return chatSubgroupMsgDao.getSubgroupMessageCount(subgroupId);
     }
+
+
 
     /**
      * 验证用户是否都是群成员

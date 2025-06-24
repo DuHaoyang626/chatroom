@@ -35,4 +35,22 @@ public interface ChatSubgroupDao extends BaseMapper<ChatSubgroup> {
      */
     @Update("UPDATE chat_subgroup SET member_count = (SELECT COUNT(*) FROM chat_subgroup_member WHERE subgroup_id = #{subgroupId} AND status = 1) WHERE id = #{subgroupId}")
     void updateMemberCount(@Param("subgroupId") Integer subgroupId);
+
+    /**
+     * 递增小组成员数
+     */
+    @Update("UPDATE chat_subgroup SET member_count = member_count + 1 WHERE id = #{subgroupId}")
+    void incrementMemberCount(@Param("subgroupId") Integer subgroupId);
+
+    /**
+     * 递减小组成员数
+     */
+    @Update("UPDATE chat_subgroup SET member_count = member_count - 1 WHERE id = #{subgroupId} AND member_count > 0")
+    void decrementMemberCount(@Param("subgroupId") Integer subgroupId);
+
+    @Select("SELECT * FROM chat_subgroup WHERE parent_group_id = #{parentGroupId} AND creator_id = #{userId} AND is_active = 1")
+    ChatSubgroup findActiveByCreator(@Param("parentGroupId") Integer parentGroupId, @Param("userId") Integer userId);
+    
+    @Select("SELECT * FROM chat_subgroup WHERE parent_group_id = #{parentGroupId} AND is_active = 1")
+    List<ChatSubgroup> findAllActiveByParentGroup(@Param("parentGroupId") Integer parentGroupId);
 } 

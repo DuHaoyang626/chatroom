@@ -1,6 +1,7 @@
 package com.dot.msg.chat.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -79,18 +80,21 @@ public class ChatSubgroupInvite implements Serializable {
     /**
      * 小组名称（查询时关联获取）
      */
+    @TableField(exist = false)
     @Schema(description = "小组名称")
     private String subgroupName;
 
     /**
      * 邀请人昵称（查询时关联获取）
      */
+    @TableField(exist = false)
     @Schema(description = "邀请人昵称")
     private String inviterNickname;
 
     /**
      * 邀请人头像（查询时关联获取）
      */
+    @TableField(exist = false)
     @Schema(description = "邀请人头像")
     private String inviterAvatar;
 } 

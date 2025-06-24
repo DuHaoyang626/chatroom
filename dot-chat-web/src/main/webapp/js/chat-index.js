@@ -35,8 +35,8 @@ $(function () {
     //欢迎对话框
     welcomeAlert();
     // 视频通话可拖拽
-    $("#call-video-dialog").draggable({ containment: "document" });
-    $("#call-audio-dialog").draggable({ containment: "document" });
+    $("#call-video-dialog").draggable({containment: "document"});
+    $("#call-audio-dialog").draggable({containment: "document"});
 
 });
 
@@ -150,7 +150,6 @@ function topSearchItemDom(user, type) {
         clickStr = "toSendMsg('" + user.chatId + "')";
         user = user.toUser;
     }
-
     return `
             <li class="search-item" onclick="${clickStr}">
                 <div class="item-avatar">
@@ -160,7 +159,7 @@ function topSearchItemDom(user, type) {
                     <div class="nickname">${user.nickname}</div>
                 </div>
             </li>
-        `;
+            `;
 }
 
 function toSendMsg(chatId) {
@@ -357,7 +356,7 @@ function initCreateGroupDialog() {
         resizable: false,
         width: 470,   //弹出框宽度
         height: 440,   //弹出框高度
-        position: { my: "left top", at: "left bottom", of: "#add-operation" },
+        position: {my: "left top", at: "left bottom", of: "#add-operation"},
         close: function (event, ui) {
             $("#search-friend-input").val("");
             $("#search-friend-list").html("");
@@ -428,7 +427,7 @@ function createGroup() {
     }
     let selectedFriendIdList = Array.from(selectedFriendIdSet);
     let url = `${MSG_URL_PREFIX}/chat/group/create`;
-    ajaxRequest(url, "post", { members: selectedFriendIdList.join(',') }, null, function (res) {
+    ajaxRequest(url, "post", {members: selectedFriendIdList.join(',')}, null, function (res) {
         if (res.code !== 200) {
             logger.info("创建群聊失败,selectedFriendIdSet:", selectedFriendIdSet);
             myAlert('', res.message, "err");
@@ -474,7 +473,7 @@ function initAddFriendDialog() {
         resizable: false,
         width: 470,   //弹出框宽度
         height: 450,   //弹出框高度
-        position: { my: "left top", at: "left bottom", of: "#add-operation" },
+        position: {my: "left top", at: "left bottom", of: "#add-operation"},
         close: function (event, ui) {
             $("#search-input").val("");
             $("#search-user-list").html("");
@@ -530,7 +529,7 @@ function saveMyInfoClick() {
     sex = sex ? parseInt(sex) : null;
     let signature = $("#signature").val();
     let url = `${MSG_URL_PREFIX}/chat/user/updateNickname`;
-    ajaxRequest(url, "post", { nickname: nickname, sex: sex, signature: signature }, null, function (res) {
+    ajaxRequest(url, "post", {nickname: nickname, sex: sex, signature: signature}, null, function (res) {
         if (res.code !== 200) {
             logger.info("昵称更新失败,res:", res);
             myAlert('', res.message, "err");
@@ -639,7 +638,7 @@ function addFriendSearchClick() {
         return;
     }
     let url = `${MSG_URL_PREFIX}/chat/user/getSearchList`;
-    ajaxRequest(url, "get", { keyword: keyword }, null, function (res) {
+    ajaxRequest(url, "get", {keyword: keyword}, null, function (res) {
         if (res.code !== 200) {
             logger.info("搜索用户列表失败,keyword:", keyword);
             myAlert('', res.message, "err");
@@ -889,7 +888,6 @@ function generateChatRoomDom(chatRoomList) {
         } else {//添加到未读消息集合
             unreadChatIdSet.add(chatRoom.chatId);
         }
-
         let chatRoomDom = `
                 <div class="${className}" chat-id="${chatRoom.chatId}" group-id="${chatRoom.groupId}" to-user-id="${toUser.userId}" is-dissolve="${toUser.isDissolve}" to-user-name="${toUser.nickname}" to-user-avatar="${toUser.avatar}" onclick="getChatMsgList(this)">
                     <div class="chat-avatar">
@@ -946,9 +944,7 @@ function getChatMsgList(_this) {
         if (chatToUser.groupId && chatToUser.groupId > 0) {
             //缓存群组成员列表
             getChatGroupMemberList(chatToUser.groupId);
-            $(".but-nav .call").addClass("hide"); //按钮隐藏视频通话
-            // todo: 加一个群组聊天的type，修改onclick字段
-            // $(".but-nav .video_call").attr()
+            $(".but-nav .call").addClass("hide"); //隐藏视频通话按钮
         } else {
             $(".but-nav .call").removeClass("hide"); //显示视频通话按钮
         }
@@ -1064,7 +1060,7 @@ function generateChatMsgDom(user, chatMsg) {
         `;
 }
 
-function getMsgDom(chatMsg, isHistory) {
+function getMsgDom(chatMsg) {
     let msgDom = ``;
     if (chatMsg.msgType === MsgType.IMAGE) {
         msgDom = getImgMsgDom(chatMsg);
@@ -1074,13 +1070,8 @@ function getMsgDom(chatMsg, isHistory) {
         msgDom = getFileMsgDom(chatMsg);
     } else if (chatMsg.msgType === MsgType.BIZ_CARD || chatMsg.msgType === MsgType.GROUP_BIZ_CARD) {
         msgDom = getCardMsgDom(chatMsg);
-    } else if (
-        chatMsg.msgType === MsgType.VIDEO_CALL ||
-        chatMsg.msgType === MsgType.AUDIO_CALL ||
-        chatMsg.msgType === MsgType.GROUP_AUDIO_CALL ||
-        chatMsg.msgType === MsgType.GROUP_VIDEO_CALL
-    ) {
-        msgDom = getCallMsgDom(chatMsg, isHistory);
+    } else if (chatMsg.msgType === MsgType.VIDEO_CALL || chatMsg.msgType === MsgType.AUDIO_CALL) {
+        msgDom = getCallMsgDom(chatMsg);
     } else {
         msgDom = getTextMsgDom(chatMsg);
     }
@@ -1174,19 +1165,11 @@ function getCardMsgDom(chatMsg) {
  * @param chatMsg
  * @returns {string}
  */
-function getCallMsgDom(chatMsg, isHistory) {
-    let msgObj;
-    try {
-        msgObj = JSON.parse(chatMsg.msg);
-    } catch (e) {
-        logger.error('信令消息JSON解析失败:', chatMsg.msg, e);
-        return '<span style="color:red">信令消息格式错误</span>';
-    }
+function getCallMsgDom(chatMsg) {
+    let msgObj = JSON.parse(chatMsg.msg);
     if (msgObj.callType === CallType.invite[0]) {
         logger.info('收到通话邀请');
-        if (!isHistory) {
-            getUserAndOpenAVCall(chatMsg);
-        }
+        getUserAndOpenAVCall(chatMsg);
         return '';
     }
     let isMy = chatMsg.sendUserId === chatUser.id;
@@ -1234,7 +1217,7 @@ function chatUserAvatarTooltip() {
             }
             return getChatUserInfoTooltipDom(this);
         },
-        hide: { effect: "fade", duration: 1750 }
+        hide: {effect: "fade", duration: 1750}
     });
 }
 
@@ -1888,7 +1871,7 @@ function gotoChatMsgInfo() {
  */
 function getChatRoomMsgInfo() {
     let url = `${MSG_URL_PREFIX}/chat/room/getChatRoomMsgInfo`;
-    ajaxSyncRequest(url, "get", { chatId: chatToUser.chatId }, null, function (res) {
+    ajaxSyncRequest(url, "get", {chatId: chatToUser.chatId}, null, function (res) {
         if (res.code !== 200) {
             logger.info("获取聊天室详情失败,chatId:", chatToUser.chatId, "res:", res);
             myAlert('', res.message, "err");
@@ -1954,14 +1937,31 @@ function generateGroupMemberDom(groupMemberList) {
             className = "more hide";
             $(".group-member-more").removeClass("hide");
         }
-
         let groupMDom = `
-                 <li class="${className}" user-id="${groupMember.userId}" nickname="${groupMember.nickname}">
+                 <li class="${className} avatar" user-id="${groupMember.userId}" action="msg-more-info">
                     <div class="member-head">
                         <img class="member-avatar" src="${groupMember.avatar}" alt=""/>
                     </div>
                     <div class="member-nickname">${groupMember.nickname}</div>
                 </li>
+            `;
+        groupMemberDom.append(groupMDom);
+    }
+    let groupMDom = `
+            <li onclick="openAddSubGroupMemberDialog('add')">
+                <div class="member-head">
+                    <div class="member-operation">+</div>
+                </div>
+            </li>
+        `;
+    groupMemberDom.append(groupMDom);
+    if (chatToUser.chatInfo.groupInfo.isGroupManager || chatToUser.chatInfo.groupInfo.isGroupLeader) {
+        groupMDom = `
+                <li onclick="openAddSubGroupMemberDialog('remove')">
+                <div class="member-head">
+                    <div class="member-operation">-</div>
+                </div>
+            </li>
             `;
         groupMemberDom.append(groupMDom);
     }
@@ -2024,7 +2024,7 @@ function moreGroupMember(_this) {
  */
 function groupQrcodeDialogOpen() {
     let url = `${MSG_URL_PREFIX}/chat/group/getGroupQrcode`;
-    ajaxRequest(url, "get", { groupId: chatToUser.groupId }, null, function (res) {
+    ajaxRequest(url, "get", {groupId: chatToUser.groupId}, null, function (res) {
         if (res.code !== 200) {
             logger.info("获取群二维码失败,groupId:", chatToUser.groupId, "res:", res);
             myAlert('', res.message, "err");
@@ -2061,13 +2061,13 @@ function groupNameDialogOpen(type) {
         $("#modify-group-avatar").attr("src", chatToUser.avatar);
         $(".modify-group-name-btn .primarybtn").attr("modify-type", "groupName");
         $(".modify-group-desc").text("修改群名称后，将在群内通知其他成员。");
-        $("#modify-group-name-dialog").dialog({ title: "修改群名称" }).dialog("open");
+        $("#modify-group-name-dialog").dialog({title: "修改群名称"}).dialog("open");
     } else if (type === "groupNickname") {
         $("#modify-group-name-input").val(chatToUser.chatInfo.groupInfo.nickname);
         $("#modify-group-avatar").attr("src", chatUser.avatar);
         $(".modify-group-name-btn .primarybtn").attr("modify-type", "groupNickname");
         $(".modify-group-desc").text("昵称修改后，只会在此群内显示，群内成员都可见。");
-        $("#modify-group-name-dialog").dialog({ title: "修改我在群里的昵称" }).dialog("open");
+        $("#modify-group-name-dialog").dialog({title: "修改我在群里的昵称"}).dialog("open");
     }
 }
 
@@ -2404,13 +2404,13 @@ function openAddSubGroupMemberDialog(type) {
     $(".search-user-list").focus();
     if (type === "add") {
         $(".add-remove-group-member .create-group-btn").text("完成");
-        $("#add-remove-group-member-dialog").dialog({ title: "添加群成员" }).dialog("open");
+        $("#add-remove-group-member-dialog").dialog({title: "添加群成员"}).dialog("open");
     } else if (type === "remove") {
         $(".add-remove-group-member .create-group-btn").text("删除");
-        $("#add-remove-group-member-dialog").dialog({ title: "移除群成员" }).dialog("open");
+        $("#add-remove-group-member-dialog").dialog({title: "移除群成员"}).dialog("open");
     } else if (type === "transfer") {
         $(".add-remove-group-member .create-group-btn").addClass("hide");
-        $("#add-remove-group-member-dialog").dialog({ title: "选择新群主" }).dialog("open");
+        $("#add-remove-group-member-dialog").dialog({title: "选择新群主"}).dialog("open");
     }
     searchUserClick();
     $("#search-u-input").on('keydown', function (event) {
@@ -2938,7 +2938,7 @@ function openChatMsgHistoryDialog() {
         $("#msg-group-member-select").parent().addClass("hide");
     }
     searchMsgTypeClick($(".active"));
-    $("#chat-msg-history-dialog").dialog({ title: title }).dialog("open");
+    $("#chat-msg-history-dialog").dialog({title: title}).dialog("open");
 }
 
 /**
@@ -2976,7 +2976,7 @@ function initGroupMemberSelectOption() {
     $.widget("custom.iconselectmenu", $.ui.selectmenu, {
         _renderItem: function (ul, item) {
             let li = $("<li>"),
-                wrapper = $("<div>", { text: item.label });
+                wrapper = $("<div>", {text: item.label});
             if (item.disabled) {
                 li.addClass("ui-state-disabled");
             }
@@ -3069,7 +3069,7 @@ function searchMsgHistoryPage() {
 function generateMsgHistoryDom(searchMsgListDom, chatMsgList) {
     for (let i = 0; i < chatMsgList.length; i++) {
         let chatMsg = chatMsgList[i];
-        let msgDom = getMsgDom(chatMsg, true);
+        let msgDom = getMsgDom(chatMsg);
         if (msgDom === "") {
             continue;
         }
@@ -3236,7 +3236,7 @@ function generateRelayUserListDom(searchUserList, type) {
 function openRelayMsgUserDialog(msgId) {
     $(".replay-msg-btn").attr("msg-id", msgId).attr("action", "relay").text("转发");
     getRelayChatRoomList();
-    $("#relay-msg-user-dialog").dialog({ title: "转发消息" }).dialog("open");
+    $("#relay-msg-user-dialog").dialog({title: "转发消息"}).dialog("open");
 }
 
 function openSendCardMsgDialog() {
@@ -3244,7 +3244,7 @@ function openSendCardMsgDialog() {
         return;
     }
     $(".replay-msg-btn").attr("action", "card").text("发送");
-    $("#relay-msg-user-dialog").dialog({ title: "发送名片" }).dialog("open");
+    $("#relay-msg-user-dialog").dialog({title: "发送名片"}).dialog("open");
     $(".relay-msg-user .primarybtn").click();
 }
 
@@ -3448,7 +3448,7 @@ function getFriendApplyInfo(_this) {
 
     let applyId = $(_this).attr("apply-id");
     let url = `${MSG_URL_PREFIX}/chat/friend/apply/info`;
-    ajaxRequest(url, "get", { applyId: applyId }, null, function (res) {
+    ajaxRequest(url, "get", {applyId: applyId}, null, function (res) {
         if (res.code !== 200) {
             logger.info("获取好友申请详情失败,applyId:", applyId, "res:", res);
             myAlert('', res.message, "err");
@@ -3515,7 +3515,7 @@ function getFriendApplyInfo(_this) {
 }
 
 function getStatusInfo(applyInfo, oh) {
-    let statusO = { agreeBtnClass: '', statusHideClass: '', replayHideClass: '' };
+    let statusO = {agreeBtnClass: '', statusHideClass: '', replayHideClass: ''};
     if (applyInfo.status === 0) {
         statusO.statusDesc = "等待" + oh + "验证";
         if (applyInfo.applyUserId === chatUser.id) {
@@ -3587,7 +3587,7 @@ function replayMsgSend() {
         myAlert('', '请输入回复内容', "err");
         return;
     }
-    let data = JSON.stringify({ applyId: applyId, replayContent: content });
+    let data = JSON.stringify({applyId: applyId, replayContent: content});
     let url = `${MSG_URL_PREFIX}/chat/friend/apply/replay`;
     ajaxRequest(url, "post", data, CONTENT_TYPE_JSON, function (res) {
         if (res.code !== 200) {
@@ -3657,14 +3657,10 @@ function getFriendList() {
         }
         let friendListDom = $("#friend-list");
         friendListDom.html("");
-        // 修正：确保容器可见
-        friendListDom.removeClass('hide').addClass('show');
         let friendList = res.data;
         let initialSet = new Set();
         for (let i = 0; i < friendList.length; i++) {
             let friend = friendList[i];
-            // 调试用：输出每个好友对象，确认isOnline字段
-            // console.log(friend);
             if (!initialSet.has(friend.initial)) {
                 let initialDom = `<label class="friend-initial">${friend.initial}</label>`;
                 initialSet.add(friend.initial);
@@ -3674,7 +3670,6 @@ function getFriendList() {
                 <div class="friend-info" friend-id="${friend.friendId}" onclick="getFriendInfo(this);">
                     <div class="friend-head">
                         <img class="friend-avatar" src="${friend.avatar}" alt=""/>
-                        <span class="online-dot ${(friend.isOnline === true || friend.isOnline === 'true') ? 'online' : 'offline'}"></span>
                     </div>
                     <div class="friend-right">
                         <div class="friend-title">
@@ -3696,7 +3691,7 @@ function getFriendInfo(_this) {
 
     let friendId = $(_this).attr("friend-id");
     let url = `${MSG_URL_PREFIX}/chat/friend/info`;
-    ajaxRequest(url, "get", { friendId: friendId }, null, function (res) {
+    ajaxRequest(url, "get", {friendId: friendId}, null, function (res) {
         if (res.code !== 200) {
             logger.info("获取好友详情失败,friendId:", friendId, "res:", res);
             myAlert('', res.message, "err");
@@ -3734,7 +3729,7 @@ function getFriendInfo(_this) {
 
 function sendMsgBtnClick(friendId) {
     let url = `${MSG_URL_PREFIX}/chat/room/gotoSendMsg`;
-    ajaxRequest(url, "get", { friendId: friendId }, null, function (res) {
+    ajaxRequest(url, "get", {friendId: friendId}, null, function (res) {
         if (res.code !== 200) {
             logger.info("去聊天室失败,friendId:", friendId, "res:", res);
             myAlert('', res.message, "err");
@@ -3757,7 +3752,7 @@ function modifyFriendRemark(_this) {
         return;
     }
     let url = `${MSG_URL_PREFIX}/chat/friend/modifyRemark`;
-    ajaxRequest(url, "post", { friendId: friendId, remark: remark }, null, function (res) {
+    ajaxRequest(url, "post", {friendId: friendId, remark: remark}, null, function (res) {
         if (res.code !== 200) {
             logger.info("修改好友备注失败,friendId:", friendId, "res:", res);
             myAlert('', res.message, "err");
@@ -4119,10 +4114,6 @@ function closeSubgroupChat() {
  * 退出小组
  */
 function leaveSubgroupClick() {
-    if (!confirm("确定要退出当前小组吗？")) {
-        return;
-    }
-    
     // 获取当前小组ID
     let url = `${MSG_URL_PREFIX}/chat/subgroup/current`;
     let data = { parentGroupId: chatToUser.groupId };
@@ -4152,10 +4143,6 @@ function leaveSubgroupClick() {
  * 解散小组（仅组长可操作）
  */
 function dissolveSubgroupClick() {
-    if (!confirm("确定要解散当前小组吗？解散后所有成员将被移除，此操作不可恢复！")) {
-        return;
-    }
-    
     if (!window.currentSubgroupInfo) {
         myAlert("", "获取小组信息失败", "err");
         return;
@@ -4194,23 +4181,48 @@ function subgroupInvitesDialog() {
  * 加载小组邀请列表
  */
 function loadSubgroupInvites() {
-    let url = `${MSG_URL_PREFIX}/chat/subgroup/invites`;
+    console.log("=== 前端开始加载小组邀请列表 ===");
+    logger.info("=== 前端开始加载小组邀请列表 ===");
     
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/invites`;
+    console.log("请求URL:", url);
+    logger.info("请求URL: {}", url);
+    
+    // 使用更健壮的请求方式
     ajaxSyncRequest(url, "get", {}, null, function(res) {
-        if (res.code === 200) {
-            if (res.data && res.data.length > 0) {
-                showSubgroupInvites(res.data);
+        console.log("收到响应:", res);
+        logger.info("收到响应: {}", JSON.stringify(res));
+        
+        try {
+            // 无论什么情况都尝试处理响应
+            if (res && res.code === 200) {
+                console.log("响应成功，数据:", res.data);
+                logger.info("响应成功，数据: {}", JSON.stringify(res.data));
+                
+                if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+                    console.log("显示 " + res.data.length + " 个邀请");
+                    logger.info("显示 {} 个邀请", res.data.length);
+                    showSubgroupInvites(res.data);
+                } else {
+                    console.log("无邀请数据，显示空状态");
+                    logger.info("无邀请数据，显示空状态");
+                    showNoInvites();
+                }
             } else {
+                console.log("响应失败，显示空状态，错误:", res ? res.message : "未知错误");
+                logger.warn("响应失败，显示空状态，错误: {}", res ? res.message : "未知错误");
                 showNoInvites();
             }
-        } else {
+        } catch (e) {
+            console.error("处理响应时出错:", e);
+            logger.error("处理响应时出错", e);
             showNoInvites();
-            logger.warn("获取小组邀请列表失败:", res.message || "后端服务不可用");
         }
     }, function(error) {
-        // API请求失败时显示无邀请信息
+        console.error("请求失败:", error);
+        logger.error("请求失败: {}", error);
+        // 即使请求失败也显示空状态，而不是让用户看到错误
         showNoInvites();
-        logger.warn("小组邀请列表API请求失败，可能是后端服务未启动:", error);
     });
 }
 
@@ -4218,50 +4230,111 @@ function loadSubgroupInvites() {
  * 显示小组邀请列表
  */
 function showSubgroupInvites(invites) {
-    $("#no-invites-info").addClass("hide");
+    console.log("开始显示邀请列表，数量:", invites.length);
+    logger.info("开始显示邀请列表，数量: {}", invites.length);
     
-    let invitesHtml = "";
-    for (let invite of invites) {
-        invitesHtml += `
-            <li class="subgroup-invite-item">
-                <div class="invite-header">
-                    <span class="invite-subgroup-name">${invite.subgroupName}</span>
-                    <span class="invite-time">${invite.inviteTime}</span>
-                </div>
-                <div class="invite-from">邀请人：${invite.inviterNickname || '未知用户'}</div>
-                <div class="invite-actions">
-                    <button class="invite-accept-btn" onclick="acceptSubgroupInvite(${invite.id})">接受</button>
-                    <button class="invite-reject-btn" onclick="rejectSubgroupInvite(${invite.id})">拒绝</button>
-                </div>
-            </li>
-        `;
+    try {
+        $("#no-invites-info").addClass("hide");
+        
+        let invitesHtml = "";
+        for (let i = 0; i < invites.length; i++) {
+            let invite = invites[i];
+            console.log("处理邀请 " + (i + 1) + ":", invite);
+            logger.info("处理邀请 {}: {}", i + 1, JSON.stringify(invite));
+            
+            // 安全地获取邀请信息
+            let subgroupName = invite.subgroupName || "未知小组";
+            let inviterNickname = invite.inviterNickname || "未知用户";
+            let inviteTime = invite.inviteTime || "";
+            let inviteId = invite.id || 0;
+            
+            if (inviteId <= 0) {
+                console.warn("邀请ID无效，跳过:", invite);
+                logger.warn("邀请ID无效，跳过: {}", JSON.stringify(invite));
+                continue;
+            }
+            
+            invitesHtml += `
+                <li class="subgroup-invite-item">
+                    <div class="invite-header">
+                        <span class="invite-subgroup-name">${subgroupName}</span>
+                        <span class="invite-time">${inviteTime}</span>
+                    </div>
+                    <div class="invite-from">邀请人：${inviterNickname}</div>
+                    <div class="invite-actions">
+                        <button class="invite-accept-btn" onclick="acceptSubgroupInvite(${inviteId})">接受</button>
+                        <button class="invite-reject-btn" onclick="rejectSubgroupInvite(${inviteId})">拒绝</button>
+                    </div>
+                </li>
+            `;
+        }
+        
+        if (invitesHtml === "") {
+            console.log("没有有效的邀请，显示空状态");
+            logger.info("没有有效的邀请，显示空状态");
+            showNoInvites();
+            return;
+        }
+        
+        $("#subgroup-invites-list").html(invitesHtml);
+        console.log("邀请列表显示完成");
+        logger.info("邀请列表显示完成");
+        
+    } catch (e) {
+        console.error("显示邀请列表时出错:", e);
+        logger.error("显示邀请列表时出错", e);
+        showNoInvites();
     }
-    
-    $("#subgroup-invites-list").html(invitesHtml);
 }
 
 /**
  * 显示无邀请信息
  */
 function showNoInvites() {
-    $("#subgroup-invites-list").html("");
-    $("#no-invites-info").removeClass("hide");
+    console.log("显示无邀请状态");
+    logger.info("显示无邀请状态");
+    
+    try {
+        $("#subgroup-invites-list").html("");
+        $("#no-invites-info").removeClass("hide");
+        console.log("无邀请状态显示完成");
+        logger.info("无邀请状态显示完成");
+    } catch (e) {
+        console.error("显示无邀请状态时出错:", e);
+        logger.error("显示无邀请状态时出错", e);
+    }
 }
 
 /**
  * 接受小组邀请
  */
 function acceptSubgroupInvite(inviteId) {
-    let url = `${MSG_URL_PREFIX}/chat/subgroup/accept`;
-    let data = { inviteId: inviteId };
+    if (!inviteId) {
+        myAlert("", "邀请ID无效", "err");
+        return;
+    }
     
-    ajaxSyncRequest(url, "post", data, null, function(res) {
-        if (res.code === 200) {
-            myAlert("", "已加入小组", "suc");
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/accept`;
+    let data = `inviteId=${inviteId}`;
+    
+    logger.info("接受小组邀请:", { inviteId: inviteId, url: url });
+    
+    ajaxSyncRequest(url, "post", data, "application/x-www-form-urlencoded", function(res) {
+        logger.info("接受邀请响应:", res);
+        
+        if (res.code === 200 && res.success) {
+            myAlert("", "成功加入小组", "success");
             loadSubgroupInvites(); // 刷新邀请列表
             updateSubgroupInviteCount(); // 更新邀请数量
+            
+            // 刷新我的小组信息
+            if (typeof loadMySubgroupInfo === 'function') {
+                loadMySubgroupInfo();
+            }
         } else {
+            // 显示后端返回的具体错误信息
             myAlert("", res.message || "加入小组失败", "err");
+            logger.error("加入小组失败:", res);
         }
     });
 }
@@ -4270,16 +4343,27 @@ function acceptSubgroupInvite(inviteId) {
  * 拒绝小组邀请
  */
 function rejectSubgroupInvite(inviteId) {
-    let url = `${MSG_URL_PREFIX}/chat/subgroup/reject`;
-    let data = { inviteId: inviteId };
+    if (!inviteId) {
+        myAlert("", "邀请ID无效", "err");
+        return;
+    }
     
-    ajaxSyncRequest(url, "post", data, null, function(res) {
-        if (res.code === 200) {
+    let url = `${MSG_URL_PREFIX}/chat/subgroup/reject`;
+    let data = `inviteId=${inviteId}`;
+    
+    logger.info("拒绝小组邀请:", { inviteId: inviteId, url: url });
+    
+    ajaxSyncRequest(url, "post", data, "application/x-www-form-urlencoded", function(res) {
+        logger.info("拒绝邀请响应:", res);
+        
+        if (res.code === 200 && res.success) {
             myAlert("", "已拒绝邀请", "info");
             loadSubgroupInvites(); // 刷新邀请列表
             updateSubgroupInviteCount(); // 更新邀请数量
         } else {
+            // 显示后端返回的具体错误信息
             myAlert("", res.message || "拒绝邀请失败", "err");
+            logger.error("拒绝邀请失败:", res);
         }
     });
 }
