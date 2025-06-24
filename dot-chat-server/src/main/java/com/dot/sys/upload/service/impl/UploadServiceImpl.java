@@ -84,7 +84,8 @@ public class UploadServiceImpl implements UploadService {
     public UploadResponse uploadVideoAsync(MultipartFile multipart, String model) {
         UploadResponse response = getUploadResponse(multipart, videoConfig, model);
         // 动态拼接端口，生成完整封面图片URL
-        String defaultCoverUrl = "http://localhost:" + serverPort + "/ico/video-default.jpg";
+//        String defaultCoverUrl = "http://localhost:" + serverPort + "/ico/video-default.jpg";
+        String defaultCoverUrl = "http://ee9b85f3.natappfree.cc/images/video-default.jpg";
         response.setCoverUrl(defaultCoverUrl);
         // 上传视频文件
         upload(multipart, true, response);

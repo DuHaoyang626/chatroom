@@ -1,4 +1,4 @@
-spring:
+pring:
   main:
     allow-circular-references: true
   profiles:

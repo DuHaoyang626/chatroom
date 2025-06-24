@@ -2245,7 +2245,8 @@ function instantiateTextbox() {
         images: {
             upload: {
                 url: `${SYS_URL_PREFIX}/upload/img`,
-                basePath: 'http://localhost/'
+                // basePath: 'http://localhost/'
+                basePath: 'http://ee9b85f3.natappfree.cc/'
             }
         }
     });
