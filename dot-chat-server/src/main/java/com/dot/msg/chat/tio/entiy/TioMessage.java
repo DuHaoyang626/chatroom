@@ -14,7 +14,7 @@ import java.io.Serializable;
  * Socket 发送消息模板
  *
  * @author: fusihan.
- * @date: Created in 2025/6/18 10:40
+ * @date: Created in 2025/6/20 10:40
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)

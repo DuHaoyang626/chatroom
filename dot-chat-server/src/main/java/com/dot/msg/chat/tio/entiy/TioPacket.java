@@ -9,7 +9,7 @@ import java.io.Serializable;
  * socket消息包
  *
  * @author: fusihan.
- * @date: Created in 2025/6/18 10:40
+ * @date: Created in 2025/6/20 10:40
  */
 @Data
 public class TioPacket extends Packet implements Serializable {

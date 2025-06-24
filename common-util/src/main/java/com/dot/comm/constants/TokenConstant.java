@@ -3,7 +3,7 @@ package com.dot.comm.constants;
 /**
  * token操作常量
  *
- * @date: Created in 2023/9/26 15:36
+ * @date: Created in 2025/6/20 15:36
  */
 public interface TokenConstant {
 
